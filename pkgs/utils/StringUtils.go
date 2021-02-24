@@ -16,7 +16,7 @@ func (String) IsEmpty(vS string) bool {
 	return vS == ""
 }
 
-func (String) ZeroStr(vStr string, zeroLen int64) string {
+func (String) ZeroAdd(vStr string, zeroLen int64) string {
 	var (
 		n       int64
 		zeroStr = ""
