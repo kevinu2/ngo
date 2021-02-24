@@ -15,3 +15,19 @@ func (String) Reverse(vS string) string {
 func (String) IsEmpty(vS string) bool {
 	return vS == ""
 }
+
+func (String) ZeroStr(vStr string, zeroLen int64) string {
+	var (
+		n       int64
+		zeroStr = ""
+		zero    = "0"
+	)
+
+	if zeroLen < 0 {
+		return zeroStr
+	}
+	for n = 0; n < zeroLen; n++ {
+		zeroStr = zeroStr + zero
+	}
+	return zeroStr + vStr
+}
