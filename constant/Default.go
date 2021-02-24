@@ -1,13 +1,18 @@
 package constant
 
 const (
+	DefaultAccuracy = 4
+)
+
+const (
 	RedisHeaderToken = "s:token"
 )
 
 //常量
 const (
-	DefaultZero  = string("0.0000")
-	DefaultEmpty = string("")
+	DefaultZero      = string("0")
+	DefaultZeroFloat = string("0.0000")
+	DefaultEmpty     = string("")
 )
 
 //code

@@ -1,6 +1,9 @@
 package utils
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"ngo/pkgs/utils/BigMath"
+)
 
 func I18nString(universal, i18n, lang string) string {
 	i18nMap := make(map[string]string)
@@ -15,9 +18,9 @@ func I18nString(universal, i18n, lang string) string {
 }
 
 func I18nByPN(numberStr, universalPositive, i18nPositive, universalNegative, i18nNegative, lang string) string {
-	if Gt(numberStr, "0") {
+	if BigMath.Gt(numberStr, "0") {
 		return I18nString(universalPositive, i18nPositive, lang)
-	} else if Lt(numberStr, "0") {
+	} else if BigMath.Lt(numberStr, "0") {
 		return I18nString(universalNegative, i18nNegative, lang)
 	} else {
 		return ""
