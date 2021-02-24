@@ -9,6 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/sha3"
+	"ngo/pkgs/utils/Strings"
 	"strings"
 )
 
@@ -84,7 +85,7 @@ func (Crypt) DecodeInvitation(invitationCode string) int64 {
 	length := int64(len(INVITATION_KEY))
 	startIndex := strings.LastIndex(invitationCode, "0") + 1
 	code := invitationCode[startIndex:len(invitationCode)]
-	code = String{}.Reverse(code)
+	code = Strings.Reverse(code)
 	var num int64
 	for i := 0; i < len(code); i++ {
 		index := strings.Index(INVITATION_KEY, string(code[i]))
