@@ -51,15 +51,13 @@ func Div(d1Str, d2Str string) string {
 	return d1.Div(d2).Truncate(8).String()
 }
 
-func DivInt(d1Str, d2Str string) int {
+func DivInt(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	if d2.IsZero() {
-		return 0
+		return d1Str
 	}
-	rsStr := d1.Div(d2).Truncate(0).String()
-	n, _ := strconv.ParseInt(rsStr, 0, 64)
-	return int(n)
+	return d1.Div(d2).Truncate(0).String()
 }
 
 func Div4(d1Str, d2Str string) string {
