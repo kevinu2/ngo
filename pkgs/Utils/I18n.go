@@ -1,8 +1,8 @@
-package utils
+package Utils
 
 import (
 	"encoding/json"
-	"ngo/pkgs/utils/BigMath"
+	"ngo/pkgs/BigMath"
 )
 
 func I18nString(universal, i18n, lang string) string {

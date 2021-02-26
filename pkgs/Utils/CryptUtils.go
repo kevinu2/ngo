@@ -1,4 +1,4 @@
-package utils
+package Utils
 
 import (
 	"crypto/hmac"
@@ -9,7 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/sha3"
-	"ngo/pkgs/utils/Strings"
+	"ngo/pkgs/Strings"
 	"strings"
 )
 

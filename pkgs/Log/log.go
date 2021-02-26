@@ -1,4 +1,4 @@
-package log
+package Log
 
 import (
 	"github.com/spf13/viper"
@@ -59,13 +59,13 @@ func InitLoggerLevel(level string) *zap.SugaredLogger {
 
 func Logger() *zap.SugaredLogger {
 	if logger == nil {
-		logger = InitLoggerLevel(viper.GetString("log.level"))
+		logger = InitLoggerLevel(viper.GetString("Log.level"))
 	}
 	return logger
 }
 
 func getLogPath() string {
-	logPath := viper.GetString("log.path")
-	logFile := viper.GetString("log.file")
+	logPath := viper.GetString("Log.path")
+	logFile := viper.GetString("Log.file")
 	return logPath + "/" + logFile
 }
