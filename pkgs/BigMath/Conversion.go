@@ -25,7 +25,7 @@ func BinToDec(binStr string) (decStr string) {
 	//bin, _ := decimal.NewFromString(binStr)
 	var (
 		bin     = "2"
-		counter = "1"
+		counter = "0"
 	)
 	for _, v := range []byte(binStr) {
 		if string(v) == "1" {
