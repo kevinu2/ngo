@@ -32,6 +32,7 @@ func BinToDec(binStr string) (decStr string) {
 	)
 
 	for _, v := range binSlice {
+		fmt.Println(v)
 		if v == "1" {
 			decStr = Add(decStr, Pow(bin, counter))
 		}
