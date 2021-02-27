@@ -1,6 +1,7 @@
 package BigMath
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"ngo/constant"
 )
@@ -25,13 +26,14 @@ func BinToDec(binStr string) (decStr string) {
 	//bin, _ := decimal.NewFromString(binStr)
 	var (
 		bin     = "2"
-		counter = "0"
+		counter = fmt.Sprint(len(binStr) - 1)
 	)
+
 	for _, v := range []byte(binStr) {
 		if string(v) == "1" {
 			decStr = Add(decStr, Pow(bin, counter))
 		}
-		counter = Add(counter, "1")
+		counter = Sub(counter, "1")
 	}
 
 	return decStr
