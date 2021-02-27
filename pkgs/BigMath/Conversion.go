@@ -5,10 +5,9 @@ import (
 	"ngo/constant"
 )
 
-func DecToBin(d1Str string) string {
+func DecToBin(d1Str string) (decStr string) {
 	bin := decimal.NewFromInt(2)
 	d1, _ := decimal.NewFromString(d1Str)
-	decStr := ""
 	if d1 == decimal.Zero {
 		return constant.DefaultZero
 	}
@@ -19,5 +18,21 @@ func DecToBin(d1Str string) string {
 		lsb := d1.Mod(bin)
 		decStr = lsb.String() + decStr
 	}
+	return decStr
+}
+
+func BinToDec(binStr string) (decStr string) {
+	//bin, _ := decimal.NewFromString(binStr)
+	var (
+		bin     = "2"
+		counter = "1"
+	)
+	for _, v := range []byte(binStr) {
+		if string(v) == "1" {
+			decStr = Add(decStr, Pow(bin, counter))
+		}
+		counter = Add(counter, "1")
+	}
+
 	return decStr
 }
