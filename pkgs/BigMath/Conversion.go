@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"ngo/constant"
+	"strings"
 )
 
 func DecToBin(d1Str string) (decStr string) {
@@ -25,12 +26,13 @@ func DecToBin(d1Str string) (decStr string) {
 func BinToDec(binStr string) (decStr string) {
 	//bin, _ := decimal.NewFromString(binStr)
 	var (
-		bin     = "2"
-		counter = fmt.Sprint(len(binStr) - 1)
+		bin      = "2"
+		binSlice = strings.Split(binStr, "")
+		counter  = fmt.Sprint(len(binSlice) - 1)
 	)
 
-	for _, v := range []byte(binStr) {
-		if string(v) == "1" {
+	for _, v := range binSlice {
+		if v == "1" {
 			decStr = Add(decStr, Pow(bin, counter))
 		}
 		counter = Sub(counter, "1")
