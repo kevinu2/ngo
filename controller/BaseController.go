@@ -1,14 +1,14 @@
 package controller
 
 import (
-	"cp/constant"
-	"cp/db"
-	"cp/log"
-	"cp/model"
-	"cp/model/response"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"ngo/constant"
+	"ngo/model"
+	"ngo/model/response"
+	db "ngo/pkgs/Db"
+	log "ngo/pkgs/Log"
 )
 
 func LoginFilter() gin.HandlerFunc {
