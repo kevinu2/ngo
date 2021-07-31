@@ -17,7 +17,7 @@ var l *Log
 
 type Log struct {
 	logger *zap.SugaredLogger
-	config *model.LogConfig
+	Config *model.LogConfig
 }
 
 func init() {
@@ -32,7 +32,7 @@ func AddConfig(logLevel, logPath, logFile, logOutput string) {
 	l.addConfig(logLevel, logPath, logFile, logOutput)
 }
 func (l *Log) addConfig(logLevel, logPath, logFile, logOutput string) {
-	l.config = &model.LogConfig{
+	l.Config = &model.LogConfig{
 		LogLevel:  logLevel,
 		LogPath:   logPath,
 		LogFile:   logFile,
@@ -57,20 +57,20 @@ func (l *Log) initLogger(level zapcore.Level) {
 		},
 	})
 
-	switch l.config.LogOutput {
+	switch l.Config.LogOutput {
 	case enum.LogOutputStd.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
 		)
 	case enum.LogOutputFile.Type():
 		core = zapcore.NewTee(
-			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.config.LogPath, l.config.LogFile))), level),
+			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.Config.LogPath, l.Config.LogFile))), level),
 		)
 		//logger := zap.NewDevelopment()
 	case enum.LogOutputBoth.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
-			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.config.LogPath, l.config.LogFile))), level),
+			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.Config.LogPath, l.Config.LogFile))), level),
 		)
 	default:
 		core = zapcore.NewTee(
@@ -82,7 +82,7 @@ func (l *Log) initLogger(level zapcore.Level) {
 }
 
 func (l *Log) InitLoggerLevel() {
-	switch l.config.LogLevel {
+	switch l.Config.LogLevel {
 	case enum.LogDebug.Level():
 		l.initLogger(zapcore.DebugLevel)
 		return
