@@ -6,22 +6,21 @@ import (
 	"strconv"
 )
 
-// 加法
+// Add 加法
 func Add(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Add(d2).Truncate(8).String()
 }
 
-// 减法
+// Sub 减法
 func Sub(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Sub(d2).Truncate(8).String()
 }
 
-//
-
+// SubF 减法浮点
 func SubF(d1Str, d2Str string) float64 {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
@@ -29,19 +28,21 @@ func SubF(d1Str, d2Str string) float64 {
 	return d3
 }
 
-// 乘法
+// Mul 乘法
 func Mul(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Mul(d2).Truncate(8).String()
 }
-func AbsMul(d1Str, d2Str string) string {
+
+// MulAbs 乘法绝对值
+func MulAbs(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Mul(d2).Truncate(8).Abs().String()
 }
 
-// 除法
+// Div 除法
 func Div(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
@@ -51,6 +52,7 @@ func Div(d1Str, d2Str string) string {
 	return d1.Div(d2).Truncate(8).String()
 }
 
+// DivInt 除法int
 func DivInt(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
@@ -60,6 +62,7 @@ func DivInt(d1Str, d2Str string) string {
 	return d1.Div(d2).Truncate(0).String()
 }
 
+// Div4 除法4位
 func Div4(d1Str, d2Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
@@ -69,6 +72,7 @@ func Div4(d1Str, d2Str string) string {
 	return d1.Div(d2).Truncate(4).String()
 }
 
+// DivF 除法浮点
 func DivF(d1Str, d2Str string) float64 {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
@@ -79,90 +83,90 @@ func DivF(d1Str, d2Str string) float64 {
 	return d3
 }
 
-// 等于
+// Eq 等于
 func Eq(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Equal(d2)
 }
 
-// 绝对值等于
+// AbsEq 绝对值等于
 func AbsEq(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Abs().Equal(d2.Abs())
 }
 
-// 大于
+// Gt 大于
 func Gt(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.GreaterThan(d2)
 }
 
-// 绝对值大于
+// AbsGt 绝对值大于
 func AbsGt(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Abs().GreaterThan(d2.Abs())
 }
 
-// 大于等于
+// Gte 大于等于
 func Gte(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.GreaterThanOrEqual(d2)
 }
 
-// 绝对值大于等于
+// AbsGte 绝对值大于等于
 func AbsGte(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Abs().GreaterThanOrEqual(d2.Abs())
 }
 
-// 小于
+// Lt 小于
 func Lt(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.LessThan(d2)
 }
 
-// 绝对值小于
+// AbsLt 绝对值小于
 func AbsLt(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Abs().LessThan(d2.Abs())
 }
 
-// 小于等于
+// Lte 小于等于
 func Lte(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.LessThanOrEqual(d2)
 }
 
-// 绝对值小于等于
+// AbsLte 绝对值小于等于
 func AbsLte(d1Str, d2Str string) bool {
 	d1, _ := decimal.NewFromString(d1Str)
 	d2, _ := decimal.NewFromString(d2Str)
 	return d1.Abs().LessThanOrEqual(d2.Abs())
 }
 
-// 反数
+// Inverse 反数
 func Inverse(d1Str string) string {
 	minus := decimal.NewFromInt(-1)
 	d1, _ := decimal.NewFromString(d1Str)
 	return d1.Mul(minus).Truncate(8).String()
 }
 
-// 绝对值
+// Abs 绝对值
 func Abs(d1Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	return d1.Abs().Truncate(8).String()
 }
 
-// n次方
+// Pow n次方
 func Pow(d1Str string, n string) string {
 	n1, _ := strconv.Atoi(n)
 	d1, _ := decimal.NewFromString(d1Str)
@@ -180,7 +184,7 @@ func Pow(d1Str string, n string) string {
 	return d1.Truncate(8).String()
 }
 
-// 平方根
+// Sqrt 平方根
 func Sqrt(d1Str string) string {
 	d1, _ := decimal.NewFromString(d1Str)
 	d1Float, _ := d1.Float64()

@@ -2,7 +2,7 @@ package constant
 
 //服务错误码
 var (
-	NEED_INVITATION_CODE_1005    = 1005  //需要邀请码
+	NeedInvitationCode1005       = 1005  //需要邀请码
 	DbError1999                  = 1999  //数据库错误
 	EmailFormatErr2000           = 2000  //邮箱格式错误
 	PwdLengthErr2006             = 2006  //密码长度不够
@@ -17,9 +17,9 @@ var (
 	UserNotExist2106             = 2106  //用户不存在
 	InvitationCodeError2124      = 2124  //无效验证码
 	ParamsError3000              = 3000  //参数错误
-	PARAMS_NULL_3003             = 3002  //参数为空
+	ParamsNull3003               = 3002  //参数为空
 	ServiceNetworkBad4000        = 4000  //当前服务网络不稳定
 	ServiceBusy4003              = 4003  //服务器繁忙
 	PermissionDecline10000       = 10000 //用户没有权限
-	INVALID_INVITER_15002        = 15002 //邀请码无效
+	InvalidInviter15002          = 15002 //邀请码无效
 )

@@ -7,9 +7,9 @@ const (
 
 	TimeSimpleDayFormat = "01-02 15:04:05"
 
-	//"2020-07-02T08:47:29.000Z"
+	// TimeUtcFormat "2020-07-02T08:47:29.000Z"
 	TimeUtcFormat = "2006-01-02T15:04:05.000Z"
-	//"2020-07-02T08:47:29.000000Z"
+	// TimeUtcFormatMicro "2020-07-02T08:47:29.000000Z"
 	TimeUtcFormatMicro = "2006-01-02T15:04:05.000000Z"
 
 	TimeDayFormat = "060102"

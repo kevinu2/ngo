@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-const INVITATION_KEY = "E5aFbCDcGd3HeQAf4Bg1NiOjPhIkJ2lRSnTUmV67MWX89KLYZ"
+const InvitationKey = "E5aFbCDcGd3HeQAf4Bg1NiOjPhIkJ2lRSnTUmV67MWX89KLYZ"
 
 type Crypt struct {
 }
@@ -62,7 +62,7 @@ func (Crypt) SessionId() string {
 }
 
 func (Crypt) EncodeInvitation(userId uint64) string {
-	length := uint64(len(INVITATION_KEY))
+	length := uint64(len(InvitationKey))
 	num := userId
 	var code string
 	for {
@@ -72,7 +72,7 @@ func (Crypt) EncodeInvitation(userId uint64) string {
 		mod := num % length
 		num = (num - mod) / length
 
-		code = fmt.Sprintf("%s%s", string(INVITATION_KEY[mod]), code)
+		code = fmt.Sprintf("%s%s", string(InvitationKey[mod]), code)
 	}
 	fmt.Println(code)
 	if len(code) < 6 {
@@ -82,13 +82,13 @@ func (Crypt) EncodeInvitation(userId uint64) string {
 }
 
 func (Crypt) DecodeInvitation(invitationCode string) int64 {
-	length := int64(len(INVITATION_KEY))
+	length := int64(len(InvitationKey))
 	startIndex := strings.LastIndex(invitationCode, "0") + 1
 	code := invitationCode[startIndex:len(invitationCode)]
 	code = Strings.Reverse(code)
 	var num int64
 	for i := 0; i < len(code); i++ {
-		index := strings.Index(INVITATION_KEY, string(code[i]))
+		index := strings.Index(InvitationKey, string(code[i]))
 		le := decimal.NewFromInt(length)
 		m := decimal.NewFromInt(int64(i))
 		ind := decimal.NewFromInt(int64(index))

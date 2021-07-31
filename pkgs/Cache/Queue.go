@@ -1,20 +1,20 @@
 package Cache
 
 import (
+	"github.com/aiscrm/redisgo"
 	r "github.com/gomodule/redigo/redis"
 	"ngo/constant"
-	db "ngo/pkgs/Db"
 )
 
 type Queue struct {
 	QueueName    string
-	DB           *db.Pool
+	Redis        *redisgo.Cacher
 	RedisTimeout int
 }
 
 func (q Queue) Produce(data []string) error {
 	for _, v := range data {
-		err := q.DB.Redis.LPush(q.QueueName, v)
+		err := q.Redis.LPush(q.QueueName, v)
 		if err != nil {
 			return err
 		}
@@ -24,7 +24,7 @@ func (q Queue) Produce(data []string) error {
 
 func (q Queue) Consume() (string, error) {
 	for {
-		rs, err := q.DB.Redis.BRPop(q.QueueName, q.RedisTimeout)
+		rs, err := q.Redis.BRPop(q.QueueName, q.RedisTimeout)
 		if err != nil {
 			return constant.DefaultEmpty, err
 		} else {

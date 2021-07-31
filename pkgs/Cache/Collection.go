@@ -1,8 +1,8 @@
 package Cache
 
 import (
+	"github.com/aiscrm/redisgo"
 	"ngo/enum"
-	db "ngo/pkgs/Db"
 	log "ngo/pkgs/Log"
 )
 
@@ -17,11 +17,11 @@ type Collection struct {
 	IncrData  CollectionData
 	LastData  CollectionData
 	TailsData []CollectionData
-	DB        *db.Pool
+	Redis     *redisgo.Cacher
 }
 
 func (c *Collection) Set() error {
-	_, err := c.DB.Redis.ZAdd(c.Name, c.IncrData.Score, c.IncrData.Member)
+	_, err := c.Redis.ZAdd(c.Name, c.IncrData.Score, c.IncrData.Member)
 	if err != nil {
 		return err
 	}
@@ -39,13 +39,13 @@ func (c *Collection) Set() error {
 func (c *Collection) Gc(max int64) error {
 	// ZRevRangeByScore Z:OPTION:TIMELINE:1:1 1609739148000 -1 LIMIT 0 10
 	for {
-		rs, err := c.DB.Redis.ZRevrangeByScore(c.Name, max, -1, 0, 100)
+		rs, err := c.Redis.ZRevrangeByScore(c.Name, max, -1, 0, 100)
 		if err != nil {
 			return err
 		}
 		if len(rs) > 0 {
 			for k := range rs {
-				_, err = c.DB.Redis.ZRem(c.Name, k)
+				_, err = c.Redis.ZRem(c.Name, k)
 				if err != nil {
 					return err
 				}
@@ -57,7 +57,7 @@ func (c *Collection) Gc(max int64) error {
 }
 
 func (c *Collection) Last() error {
-	rs, err := c.DB.Redis.ZRevrange(c.Name, 0, 0)
+	rs, err := c.Redis.ZRevrange(c.Name, 0, 0)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (c *Collection) Last() error {
 }
 
 func (c *Collection) Tails(max int64, num int) error {
-	rs, err := c.DB.Redis.ZRevrangeByScore(c.Name, max, -1, 0, num)
+	rs, err := c.Redis.ZRevrangeByScore(c.Name, max, -1, 0, num)
 	if err != nil {
 		return err
 	}
