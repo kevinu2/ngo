@@ -7,7 +7,7 @@ import (
 	"ngo/constant"
 	"ngo/model"
 	"ngo/model/response"
-	db "ngo/pkgs/Db"
+	"ngo/pkgs/Db/RedisDB"
 	log "ngo/pkgs/Log"
 )
 
@@ -38,7 +38,7 @@ func LoginFilter() gin.HandlerFunc {
 			return
 		}
 		//TODO getUserByKey from redis
-		redisClient := db.GetRedisDB()
+		redisClient := RedisDB.GetDB()
 		r, err := redisClient.GetString(sessionId)
 		if err != nil {
 			log.Logger().Errorf("get redis err:%v", err.Error())

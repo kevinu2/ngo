@@ -1,4 +1,4 @@
-package Db
+package SqlX
 
 import (
 	"fmt"

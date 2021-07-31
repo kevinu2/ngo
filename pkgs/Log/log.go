@@ -18,7 +18,7 @@ func InitLogger(logPath string, level zapper.Level) *zap.SugaredLogger {
 		Filename:   logPath, // ⽇志⽂件路径
 		MaxSize:    1024,    // megabytes
 		MaxBackups: 10,      // 最多保留10个备份
-		MaxAge:     30,      //days
+		MaxAge:     30,      // days
 		Compress:   true,    // 是否压缩 disabled by default
 	}
 	w := zapper.AddSync(&hook)
