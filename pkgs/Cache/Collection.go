@@ -2,7 +2,7 @@ package Cache
 
 import (
 	"github.com/aiscrm/redisgo"
-	"ngo/enum"
+	"github.com/kevinu2/ngo/enum"
 	log "ngo/pkgs/Log"
 )
 

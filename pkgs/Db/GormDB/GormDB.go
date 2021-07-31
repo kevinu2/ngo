@@ -3,11 +3,11 @@ package GormDB
 import (
 	"database/sql"
 	"fmt"
+	"github.com/kevinu2/ngo/enum"
+	"github.com/kevinu2/ngo/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"ngo/enum"
-	"ngo/model"
 	"time"
 )
 
@@ -34,9 +34,9 @@ func GetDB() *sql.DB {
 }
 
 func AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName string, dbMaxIdle, dbMaxOpen, dbMaxLifeTime int) {
-	g.addConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxOpen, dbMaxLifeTime)
+	g.AddConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxOpen, dbMaxLifeTime)
 }
-func (g *Gorm) addConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName string, dbMaxIdle, dbMaxOpen, dbMaxLifeTime int) {
+func (g *Gorm) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName string, dbMaxIdle, dbMaxOpen, dbMaxLifeTime int) {
 	g.Config = &model.GormDbConfig{
 		DbUser:        dbUser,
 		DbPass:        dbPass,

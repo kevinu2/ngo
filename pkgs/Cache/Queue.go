@@ -3,7 +3,7 @@ package Cache
 import (
 	"github.com/aiscrm/redisgo"
 	r "github.com/gomodule/redigo/redis"
-	"ngo/constant"
+	"github.com/kevinu2/ngo/constant"
 )
 
 type Queue struct {

@@ -2,13 +2,13 @@ package Log
 
 import (
 	"fmt"
+	"github.com/kevinu2/ngo/constant"
+	"github.com/kevinu2/ngo/enum"
+	"github.com/kevinu2/ngo/model"
 	rotates "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
-	"ngo/constant"
-	"ngo/enum"
-	"ngo/model"
 	"os"
 	"time"
 )

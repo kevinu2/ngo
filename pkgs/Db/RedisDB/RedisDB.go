@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aiscrm/redisgo"
+	"github.com/kevinu2/ngo/model"
 	"github.com/spf13/viper"
-	"ngo/model"
 )
 
 var r *DB
@@ -24,9 +24,9 @@ func New() *DB {
 }
 
 func AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime string, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
-	r.addConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout)
+	r.AddConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout)
 }
-func (r *DB) addConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime string, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
+func (r *DB) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime string, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
 	r.Config = &model.RedisDbConfig{
 		DbUser:        dbUser,
 		DbPass:        dbPass,
