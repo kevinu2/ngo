@@ -16,7 +16,7 @@ import (
 var l *Log
 
 type Log struct {
-	logger *zap.SugaredLogger
+	Logger *zap.SugaredLogger
 	Config *model.LogConfig
 }
 
@@ -77,7 +77,7 @@ func (l *Log) initLogger(level zapcore.Level) {
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
 		)
 	}
-	l.logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel)).Sugar()
+	l.Logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel)).Sugar()
 	return
 }
 
@@ -111,10 +111,10 @@ func (l *Log) InitLoggerLevel() {
 }
 
 func Logger() *zap.SugaredLogger {
-	if l.logger == nil {
+	if l.Logger == nil {
 		l.InitLoggerLevel()
 	}
-	return l.logger
+	return l.Logger
 }
 
 func getWriter(filename string) io.Writer {
