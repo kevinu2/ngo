@@ -25,13 +25,6 @@ func New() *Gorm {
 	return new(Gorm)
 }
 
-func GetDB() *gorm.DB {
-	if g.GormDB == nil {
-		g.initDB()
-	}
-	return g.GormDB
-}
-
 func AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName string, dbMaxIdle, dbMaxOpen, dbMaxLifeTime int) {
 	g.AddConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxOpen, dbMaxLifeTime)
 }
@@ -48,6 +41,14 @@ func (g *Gorm) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTi
 		DbMaxOpen:     dbMaxOpen,
 		DbMaxLifeTime: dbMaxLifeTime,
 	}
+}
+
+func GetDB() *gorm.DB { return g.GetDB() }
+func (g *Gorm) GetDB() *gorm.DB {
+	if g.GormDB == nil {
+		g.initDB()
+	}
+	return g.GormDB
 }
 
 func (g *Gorm) initDB() {

@@ -41,7 +41,8 @@ func (r *DB) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime
 	}
 }
 
-func GetDB() *redisgo.Cacher {
+func GetDB() *redisgo.Cacher { return r.GetDB() }
+func (r *DB) GetDB() *redisgo.Cacher {
 	if r.RedisDB == nil {
 		r.initDB()
 	}

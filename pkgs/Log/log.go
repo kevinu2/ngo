@@ -16,8 +16,8 @@ import (
 var l *Log
 
 type Log struct {
-	Logger *zap.SugaredLogger
-	Config *model.LogConfig
+	SugaredLogger *zap.SugaredLogger
+	Config        *model.LogConfig
 }
 
 func init() {
@@ -29,15 +29,25 @@ func New() *Log {
 }
 
 func AddConfig(logLevel, logPath, logFile, logOutput string) {
-	l.addConfig(logLevel, logPath, logFile, logOutput)
+	l.AddConfig(logLevel, logPath, logFile, logOutput)
 }
-func (l *Log) addConfig(logLevel, logPath, logFile, logOutput string) {
+func (l *Log) AddConfig(logLevel, logPath, logFile, logOutput string) {
 	l.Config = &model.LogConfig{
 		LogLevel:  logLevel,
 		LogPath:   logPath,
 		LogFile:   logFile,
 		LogOutput: logOutput,
 	}
+}
+
+func Logger() *zap.SugaredLogger {
+	return l.GetLogger()
+}
+func (l *Log) GetLogger() *zap.SugaredLogger {
+	if l.SugaredLogger == nil {
+		l.initLoggerLevel()
+	}
+	return l.SugaredLogger
 }
 
 func (l *Log) initLogger(level zapcore.Level) {
@@ -77,11 +87,11 @@ func (l *Log) initLogger(level zapcore.Level) {
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
 		)
 	}
-	l.Logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel)).Sugar()
+	l.SugaredLogger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel)).Sugar()
 	return
 }
 
-func (l *Log) InitLoggerLevel() {
+func (l *Log) initLoggerLevel() {
 	switch l.Config.LogLevel {
 	case enum.LogDebug.Level():
 		l.initLogger(zapcore.DebugLevel)
@@ -108,13 +118,6 @@ func (l *Log) InitLoggerLevel() {
 		l.initLogger(zapcore.InfoLevel)
 		return
 	}
-}
-
-func Logger() *zap.SugaredLogger {
-	if l.Logger == nil {
-		l.InitLoggerLevel()
-	}
-	return l.Logger
 }
 
 func getWriter(filename string) io.Writer {
