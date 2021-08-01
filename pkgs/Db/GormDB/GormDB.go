@@ -1,6 +1,7 @@
 package GormDB
 
 import (
+	"errors"
 	"fmt"
 	"github.com/kevinu2/ngo/enum"
 	"github.com/kevinu2/ngo/model"
@@ -86,11 +87,13 @@ func (g *Gorm) initDB() {
 		if err != nil {
 			panic("连接数据库失败:" + err.Error())
 		}
+	default:
+		panic(errors.New("Wrong db type: " + g.Config.DbType))
 	}
 	sqlDb, _ := db.DB()
 	sqlDb.SetMaxIdleConns(g.Config.DbMaxIdle)
 	sqlDb.SetMaxOpenConns(g.Config.DbMaxOpen)
-	sqlDb.SetConnMaxLifetime(time.Hour * time.Duration(g.Config.DbMaxLifeTime))
+	sqlDb.SetConnMaxLifetime(time.Minute * time.Duration(g.Config.DbMaxLifeTime))
 
 	g.GormDB = db
 }
