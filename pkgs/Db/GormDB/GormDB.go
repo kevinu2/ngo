@@ -1,7 +1,6 @@
 package GormDB
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/kevinu2/ngo/enum"
 	"github.com/kevinu2/ngo/model"
@@ -14,7 +13,7 @@ import (
 var g *Gorm
 
 type Gorm struct {
-	GormDB *sql.DB
+	GormDB *gorm.DB
 	Config *model.GormDbConfig
 }
 
@@ -26,7 +25,7 @@ func New() *Gorm {
 	return new(Gorm)
 }
 
-func GetDB() *sql.DB {
+func GetDB() *gorm.DB {
 	if g.GormDB == nil {
 		g.initDB()
 	}
@@ -89,6 +88,7 @@ func (g *Gorm) initDB() {
 	sqlDb, _ := db.DB()
 	sqlDb.SetMaxIdleConns(g.Config.DbMaxIdle)
 	sqlDb.SetMaxOpenConns(g.Config.DbMaxOpen)
-	sqlDb.SetConnMaxLifetime(time.Hour)
-	g.GormDB = sqlDb
+	sqlDb.SetConnMaxLifetime(time.Hour * time.Duration(g.Config.DbMaxLifeTime))
+
+	g.GormDB = db
 }
