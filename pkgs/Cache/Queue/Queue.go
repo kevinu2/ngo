@@ -1,4 +1,4 @@
-package Cache
+package Queue
 
 import (
 	"github.com/aiscrm/redisgo"
