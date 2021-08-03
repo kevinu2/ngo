@@ -31,6 +31,11 @@ func New() *Collection {
 	return v
 }
 
+func AddRedis(redis *redisgo.Cacher) { c.AddRedis(redis) }
+func (c *Collection) AddRedis(redis *redisgo.Cacher) {
+	c.Redis = redis
+}
+
 func AddName(name string) { c.AddName(name) }
 func (c *Collection) AddName(name string) {
 	c.Name = name
