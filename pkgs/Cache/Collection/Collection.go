@@ -6,18 +6,21 @@ import (
 	"github.com/kevinu2/ngo/constant"
 	"github.com/kevinu2/ngo/enum"
 	"github.com/kevinu2/ngo/model"
+	"time"
 )
 
 var c *Collection
 
 type Collection struct {
-	Name      string
-	GcMax     int64
-	GcOffset  int64
-	IncrData  model.CollectionData
-	LastData  model.CollectionData
-	TailsData []model.CollectionData
-	Redis     *redisgo.Cacher
+	Name         string
+	GcOffset     int64
+	GcMax        int64
+	GcOffsetTime int64
+	GcMaxTime    int64
+	IncrData     model.CollectionData
+	LastData     model.CollectionData
+	TailsData    []model.CollectionData
+	Redis        *redisgo.Cacher
 }
 
 func init() {
@@ -41,30 +44,44 @@ func (c *Collection) AddName(name string) {
 	c.Name = name
 }
 
-func AddGc(max, offset int64) { c.AddGc(max, offset) }
-func (c *Collection) AddGc(max, offset int64) {
-	c.GcMax = max
+func AddGc(max, offset int64) { c.AddGc(offset) }
+func (c *Collection) AddGc(offset int64) {
 	c.GcOffset = offset
 }
 
 func Incr(score int64, member string) { Incr(score, member) }
-func (c *Collection) Incr(Score int64, Member string) error {
+func (c *Collection) Incr(score int64, member string) error {
 	c.IncrData = model.CollectionData{
-		Score:  Score,
-		Member: Member,
+		Score:  score,
+		Member: member,
 	}
 	err := c.set()
 	if err != nil {
-		fmt.Printf("Error: Collection %s Set(%d, %s) fails, err: %s", c.Name, Score, Member, err.Error())
+		fmt.Printf("Error: Collection %s Set(%d, %s) fails, err: %s", c.Name, score, member, err.Error())
 		return err
 	}
 	if c.GcMax > 0 {
-		err = c.Gc(c.GcMax)
+		err = c.calGc(score)
+		if err != nil {
+			fmt.Printf("Error: Collection %s calGc(%d) fails, err: %s", c.Name, score, err.Error())
+		}
+	}
+	if score > c.GcMaxTime {
+		err = c.Gc(c.GcOffsetTime)
 		if err != nil {
 			fmt.Printf("Error: Collection GC(%s) fails, err: %s", c.Name, err.Error())
 			return err
 		}
 	}
+	return nil
+}
+
+func (c *Collection) calGc(score int64) error {
+	//TODO Auto gc math
+	offsetTime := time.Duration(c.GcOffset) * time.Hour
+	maxTime := time.Duration(c.GcMax) * time.Hour
+	c.GcOffsetTime = score - offsetTime.Milliseconds() - maxTime.Milliseconds()
+	c.GcMaxTime = score - maxTime.Milliseconds()
 	return nil
 }
 
