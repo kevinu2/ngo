@@ -1,4 +1,4 @@
-package model
+package Http
 
 type UserInfo struct {
 	UserId    uint64 `json:"user_id" xorm:"pk"`

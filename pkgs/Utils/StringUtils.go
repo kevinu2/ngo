@@ -1,4 +1,4 @@
-package Strings
+package Utils
 
 func Reverse(vS string) string {
 	bytes := []rune(vS)

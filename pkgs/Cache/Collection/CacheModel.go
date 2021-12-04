@@ -1,4 +1,4 @@
-package model
+package Collection
 
 type CollectionData struct {
 	Score  int64

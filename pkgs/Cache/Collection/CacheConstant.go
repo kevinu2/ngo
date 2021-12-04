@@ -1,4 +1,4 @@
-package constant
+package Collection
 
 const (
 	CollectionGcMax    = int64(100)

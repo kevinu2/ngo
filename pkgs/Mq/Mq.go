@@ -1,4 +1,4 @@
-package constant
+package Mq
 
 const (
 	MqGroupPrefix = "group-"

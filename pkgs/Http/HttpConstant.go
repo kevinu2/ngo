@@ -1,4 +1,4 @@
-package constant
+package Http
 
 const (
 	SessionId   = "session_id"

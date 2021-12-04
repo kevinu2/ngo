@@ -3,8 +3,7 @@ package RedisDB
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aiscrm/redisgo"
-	"github.com/kevinu2/ngo/model"
+	"github.com/kevinu2/redisgo"
 	"github.com/spf13/viper"
 )
 
@@ -12,7 +11,7 @@ var r *DB
 
 type DB struct {
 	RedisDB *redisgo.Cacher
-	Config  *model.RedisDbConfig
+	Config  *RedisConfig
 }
 
 func init() {
@@ -27,7 +26,7 @@ func AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime string,
 	r.AddConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout)
 }
 func (r *DB) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime string, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
-	r.Config = &model.RedisDbConfig{
+	r.Config = &RedisConfig{
 		DbUser:        dbUser,
 		DbPass:        dbPass,
 		DbHost:        dbHost,

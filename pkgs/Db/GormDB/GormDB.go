@@ -3,8 +3,7 @@ package GormDB
 import (
 	"errors"
 	"fmt"
-	"github.com/kevinu2/ngo/enum"
-	"github.com/kevinu2/ngo/model"
+	"gorm.io/driver/clickhouse"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -15,7 +14,7 @@ var g *Gorm
 
 type Gorm struct {
 	GormDB *gorm.DB
-	Config *model.GormDbConfig
+	Config *GormConfig
 }
 
 func init() {
@@ -30,7 +29,7 @@ func AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName
 	g.AddConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxOpen, dbMaxLifeTime)
 }
 func (g *Gorm) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName string, dbMaxIdle, dbMaxOpen, dbMaxLifeTime int) {
-	g.Config = &model.GormDbConfig{
+	g.Config = &GormConfig{
 		DbUser:        dbUser,
 		DbPass:        dbPass,
 		DbHost:        dbHost,
@@ -60,7 +59,7 @@ func (g *Gorm) initDB() {
 	)
 
 	switch g.Config.DbType {
-	case enum.DbPG.GetType():
+	case DbPostgres.GetType():
 		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s  sslmode=disable TimeZone=%s dbname=%s", g.Config.DbHost, g.Config.DbPort, g.Config.DbUser, g.Config.DbPass, "UTC", g.Config.DbName)
 		db, err = gorm.Open(
 			postgres.New(postgres.Config{
@@ -68,9 +67,9 @@ func (g *Gorm) initDB() {
 				PreferSimpleProtocol: true,
 			}))
 		if err != nil {
-			panic("连接数据库失败:" + err.Error())
+			panic("Failed to connect to DB: " + err.Error())
 		}
-	case enum.DbMySQL.GetType():
+	case DbMySQL.GetType():
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=%s", g.Config.DbUser, g.Config.DbPass, g.Config.DbHost, g.Config.DbPort, g.Config.DbName, "UTC")
 		db, err = gorm.Open(
 
@@ -85,10 +84,16 @@ func (g *Gorm) initDB() {
 			&gorm.Config{},
 		)
 		if err != nil {
-			panic("连接数据库失败:" + err.Error())
+			panic("Failed to connect to DB: " + err.Error())
 		}
+	case DbClickHouse.GetType():
+		dsn := fmt.Sprintf("tcp://%s:%d?database=%s&username=%s&password=%s&read_timeout=10&write_timeout=20", g.Config.DbHost, g.Config.DbPort, g.Config.DbName, g.Config.DbUser, g.Config.DbPass)
+		db, err = gorm.Open(
+			clickhouse.Open(dsn),
+			&gorm.Config{},
+		)
 	default:
-		panic(errors.New("Wrong db type: " + g.Config.DbType))
+		panic(errors.New("Unsupported DB Type: " + g.Config.DbType))
 	}
 	sqlDb, _ := db.DB()
 	sqlDb.SetMaxIdleConns(g.Config.DbMaxIdle)

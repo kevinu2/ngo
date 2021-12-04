@@ -1,4 +1,4 @@
-package model
+package Mq
 
 type MQueueMsg struct {
 	Topic string

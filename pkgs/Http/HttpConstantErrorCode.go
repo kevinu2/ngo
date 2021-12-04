@@ -1,4 +1,4 @@
-package constant
+package Http
 
 //服务错误码
 var (

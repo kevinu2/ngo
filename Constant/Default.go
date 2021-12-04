@@ -1,4 +1,4 @@
-package constant
+package Constant
 
 const (
 	DefaultAccuracy = 4

@@ -5,9 +5,6 @@ import (
 	"github.com/Shopify/sarama"
 	cluster "github.com/bsm/sarama-cluster"
 	"github.com/spf13/viper"
-	"ngo/constant"
-	"ngo/enum"
-	"ngo/model"
 	"time"
 )
 
@@ -15,32 +12,32 @@ var m *MsgQueue
 
 type MsgQueue struct {
 	topic   string
-	service model.ConsumerI
-	config  *model.KafkaConfig
+	service ConsumerI
+	config  *KafkaConfig
 }
 
 func init() {
 	m = new(MsgQueue)
 }
 
-func AddConsumer(topic string, service model.ConsumerI, mqGroup uint8) {
+func AddConsumer(topic string, service ConsumerI, mqGroup uint8) {
 	m.AddConsumer(topic, service, mqGroup)
 }
-func (m *MsgQueue) AddConsumer(topic string, service model.ConsumerI, mqGroup uint8) {
+func (m *MsgQueue) AddConsumer(topic string, service ConsumerI, mqGroup uint8) {
 	m.topic = topic
 	m.service = service
 	m.config = InitKafka(mqGroup)
 }
 
-func InitKafka(mqGroup uint8) *model.KafkaConfig {
+func InitKafka(mqGroup uint8) *KafkaConfig {
 	switch mqGroup {
-	case enum.MqGroup.GetCode():
-		return &model.KafkaConfig{
+	case MqGroup.GetCode():
+		return &KafkaConfig{
 			Host:    viper.GetStringSlice("kafka.host"),
 			GroupId: viper.GetString("kafka.group_id"),
 		}
 	default:
-		return &model.KafkaConfig{
+		return &KafkaConfig{
 			Host:    viper.GetStringSlice("kafka_default.host"),
 			GroupId: viper.GetString("kafka_default.group_id"),
 		}
@@ -62,7 +59,7 @@ func (m *MsgQueue) Consumer() {
 	config.Group.Return.Notifications = true
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
-	groupID := fmt.Sprintf("%s%s", constant.MqGroupPrefix, m.config.GroupId)
+	groupID := fmt.Sprintf("%s%s", MqGroupPrefix, m.config.GroupId)
 	// Init consumer, consume errors & messages
 	consumer, err := cluster.NewConsumer(m.config.Host, groupID, []string{m.topic}, config)
 	if err != nil {
@@ -75,7 +72,7 @@ func (m *MsgQueue) Consumer() {
 	for {
 		select {
 		case msg, more := <-consumer.Messages():
-			var mqMsg model.MQueueMsg
+			var mqMsg MQueueMsg
 			mqMsg.Topic = m.topic
 			mqMsg.Msg = string(msg.Value)
 			m.service.Consume(mqMsg)

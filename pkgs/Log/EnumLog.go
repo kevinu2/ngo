@@ -1,4 +1,4 @@
-package enum
+package Log
 
 type LogType uint8
 

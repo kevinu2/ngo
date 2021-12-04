@@ -1,4 +1,4 @@
-package model
+package Log
 
 type LogConfig struct {
 	LogLevel  string

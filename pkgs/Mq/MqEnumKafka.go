@@ -1,4 +1,4 @@
-package enum
+package Mq
 
 type MqSrvGroup uint8
 

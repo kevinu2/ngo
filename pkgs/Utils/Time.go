@@ -2,7 +2,7 @@ package Utils
 
 import (
 	"fmt"
-	"ngo/constant"
+	"ngo/Constant"
 	"time"
 )
 
@@ -36,7 +36,7 @@ func UnixTimeCovert(unixTime int64) TimeResult {
 	default:
 		t = time.Unix(0, 0)
 	}
-	return TimeResult{UtcTime: t.UTC().Format(constant.TimeUtcFormat), UnixTime: t.Unix()}
+	return TimeResult{UtcTime: t.UTC().Format(Constant.TimeUtcFormat), UnixTime: t.Unix()}
 }
 
 func UnixTimeOffset(unixTime int64, offset int64) int64 {
@@ -58,7 +58,7 @@ func UnixPointTime(unixTime int64, period int64) int64 {
 	if period == 0 || period%60 != 0 {
 		return unixTime
 	}
-	inTime, err := time.Parse(constant.TimeUtcFormat, UnixTimeCovert(unixTime).UtcTime)
+	inTime, err := time.Parse(Constant.TimeUtcFormat, UnixTimeCovert(unixTime).UtcTime)
 	if err != nil {
 		return unixTime
 	}

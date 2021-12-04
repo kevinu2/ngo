@@ -1,4 +1,4 @@
-package enum
+package Error
 
 import "errors"
 
