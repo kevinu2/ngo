@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/kevinu2/ngo/constant"
 	"github.com/kevinu2/ngo/enum"
-	"github.com/kevinu2/ngo/model"
 	rotates "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -17,7 +16,7 @@ var l *Log
 
 type Log struct {
 	SugaredLogger *zap.SugaredLogger
-	Config        *model.LogConfig
+	Config        *Config
 }
 
 func init() {
@@ -25,6 +24,7 @@ func init() {
 }
 
 func New() *Log {
+	DefaultConfig()
 	return new(Log)
 }
 
@@ -32,11 +32,20 @@ func AddConfig(logLevel, logPath, logFile, logOutput string) {
 	l.AddConfig(logLevel, logPath, logFile, logOutput)
 }
 func (l *Log) AddConfig(logLevel, logPath, logFile, logOutput string) {
-	l.Config = &model.LogConfig{
+	l.Config = &Config{
 		LogLevel:  logLevel,
 		LogPath:   logPath,
 		LogFile:   logFile,
 		LogOutput: logOutput,
+	}
+}
+
+func DefaultConfig() {
+	l.Config = &Config{
+		LogLevel:  "Info",
+		LogPath:   "/tmp",
+		LogFile:   "app.log",
+		LogOutput: "std",
 	}
 }
 

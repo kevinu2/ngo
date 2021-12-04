@@ -1,6 +1,6 @@
 package Log
 
-type LogConfig struct {
+type Config struct {
 	LogLevel  string
 	LogPath   string
 	LogFile   string
