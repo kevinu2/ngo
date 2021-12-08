@@ -2,7 +2,7 @@ package Etcd
 
 import (
 	"flag"
-	"github.com/kevinu2/ngo/pkgs/Log"
+	"github.com/kevinu2/ngo2/pkgs/Log"
 	"time"
 )
 

@@ -2,7 +2,7 @@ package Etcd
 
 import (
 	"context"
-	"github.com/kevinu2/ngo/pkgs/Log"
+	"github.com/kevinu2/ngo2/pkgs/Log"
 	"sync"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"

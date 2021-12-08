@@ -2,7 +2,7 @@ package Etcd
 
 import (
 	"context"
-	"github.com/kevinu2/ngo/pkgs/Log"
+	"github.com/kevinu2/ngo2/pkgs/Log"
 	"time"
 
 	"github.com/pkg/errors"

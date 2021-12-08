@@ -3,9 +3,9 @@ package Http
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/kevinu2/ngo2/pkgs/Db/RedisDB"
+	"github.com/kevinu2/ngo2/pkgs/Log"
 	"net/http"
-	"ngo/pkgs/Db/RedisDB"
-	log "ngo/pkgs/Log"
 )
 
 func LoginFilter() gin.HandlerFunc {
@@ -20,15 +20,15 @@ func LoginFilter() gin.HandlerFunc {
 		sessionId, err := c.Cookie(SessionId)
 		if err != nil {
 			//c.AbortWithError(200,err)
-			log.Logger().Errorf("err:%v", err.Error())
+			Log.Logger().Errorf("err:%v", err.Error())
 			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: err.Error()}})
 			c.Abort()
 			return
 		}
-		log.Logger().Infof("session_id:%+v", sessionId)
+		Log.Logger().Infof("session_id:%+v", sessionId)
 
 		if sessionId == "" {
-			log.Logger().Error("sessionId 为空")
+			Log.Logger().Error("sessionId 为空")
 			//c.AbortWithError(200, errors.New("获取token为空"))
 			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: "获取session_id为空"}})
 			c.Abort()
@@ -38,22 +38,22 @@ func LoginFilter() gin.HandlerFunc {
 		redisClient := RedisDB.GetDB()
 		r, err := redisClient.GetString(sessionId)
 		if err != nil {
-			log.Logger().Errorf("get redis err:%v", err.Error())
+			Log.Logger().Errorf("get redis err:%v", err.Error())
 			//c.AbortWithError(200, errors.New("获取token失败"))
 			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: "redis获取session_id为空"}})
 			c.Abort()
 			return
 		}
-		log.Logger().Infof("get redis result:%+v", r)
+		Log.Logger().Infof("get redis result:%+v", r)
 		var user UserInfo
 		err = json.Unmarshal([]byte(r), &user)
 		if err != nil {
 			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: "反序列化user失败"}})
 			c.Abort()
-			log.Logger().Errorf("Marshal error:%v", err.Error())
+			Log.Logger().Errorf("Marshal error:%v", err.Error())
 			return
 		}
-		log.Logger().Infof("get user from cookie:%+v", user)
+		Log.Logger().Infof("get user from cookie:%+v", user)
 		c.Set("user", r)
 		c.Set("userId", user.UserId)
 	}
