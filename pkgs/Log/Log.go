@@ -21,10 +21,10 @@ type Log struct {
 
 func init() {
 	l = New()
+	DefaultConfig()
 }
 
 func New() *Log {
-	DefaultConfig()
 	return new(Log)
 }
 
