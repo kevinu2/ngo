@@ -26,7 +26,7 @@ type Client struct {
 	config *Config
 }
 
-// New ...
+// NewClient ...
 func NewClient(config *Config) (*Client, error) {
 	conf := clientV3.Config{
 		Endpoints:            config.Endpoints,
