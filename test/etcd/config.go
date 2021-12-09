@@ -30,6 +30,6 @@ func main() {
 		return
 	}
 
-	fmt.Println(get)
+	fmt.Printf("key: %v, value: %v", string(get.Kvs[0].Key), string(get.Kvs[0].Value))
 
 }
