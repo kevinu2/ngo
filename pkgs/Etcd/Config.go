@@ -56,7 +56,7 @@ func RawConfig(key string) *Config {
 
 // Build ...
 func (config *Config) Build() (*Client, error) {
-	return newClient(config)
+	return NewClient(config)
 }
 
 func (config *Config) MustBuild() *Client {

@@ -27,7 +27,7 @@ type Client struct {
 }
 
 // New ...
-func newClient(config *Config) (*Client, error) {
+func NewClient(config *Config) (*Client, error) {
 	conf := clientV3.Config{
 		Endpoints:            config.Endpoints,
 		DialTimeout:          config.ConnectTimeout,
