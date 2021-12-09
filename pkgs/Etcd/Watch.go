@@ -5,7 +5,7 @@ import (
 	"github.com/kevinu2/ngo2/pkgs/Log"
 	"sync"
 
-	"go.etcd.io/etcd/api/v3/mvccpb"
+	"go.etcd.io/etcd/api/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
