@@ -2,10 +2,8 @@ package Collection
 
 import (
 	"fmt"
-	"github.com/aiscrm/redisgo"
-	"github.com/kevinu2/ngo/constant"
-	"github.com/kevinu2/ngo/enum"
-	"github.com/kevinu2/ngo/model"
+	"github.com/kevinu2/redisgo"
+	"github.com/kevinu2/ngo2/pkgs/Error"
 	"time"
 )
 
@@ -17,9 +15,9 @@ type Collection struct {
 	GcMax        int64
 	GcOffsetTime int64
 	GcMaxTime    int64
-	IncrData     model.CollectionData
-	LastData     model.CollectionData
-	TailsData    []model.CollectionData
+	IncrData     CollectionData
+	LastData     CollectionData
+	TailsData    []CollectionData
 	Redis        *redisgo.Cacher
 }
 
@@ -29,8 +27,8 @@ func init() {
 
 func New() *Collection {
 	v := new(Collection)
-	v.GcMax = constant.CollectionGcMax
-	v.GcOffset = constant.CollectionGcOffset
+	v.GcMax = CollectionGcMax
+	v.GcOffset = CollectionGcOffset
 	return v
 }
 
@@ -51,7 +49,7 @@ func (c *Collection) AddGc(offset int64) {
 
 func Incr(score int64, member string) { Incr(score, member) }
 func (c *Collection) Incr(score int64, member string) error {
-	c.IncrData = model.CollectionData{
+	c.IncrData = CollectionData{
 		Score:  score,
 		Member: member,
 	}
@@ -138,9 +136,9 @@ func (c *Collection) Tails(max int64, num int) error {
 		return err
 	}
 	if len(rs) > 0 {
-		var tails []model.CollectionData
+		var tails []CollectionData
 		for k, v := range rs {
-			tails = append(tails, model.CollectionData{
+			tails = append(tails, CollectionData{
 				Score:  v,
 				Member: k,
 			})
@@ -148,6 +146,6 @@ func (c *Collection) Tails(max int64, num int) error {
 		c.TailsData = tails
 		return nil
 	} else {
-		return enum.ErrorMapEmpty.GetMsg(c.Name)
+		return Error.ErrorMapEmpty.GetMsg(c.Name)
 	}
 }
