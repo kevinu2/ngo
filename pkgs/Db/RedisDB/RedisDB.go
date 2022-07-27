@@ -3,7 +3,7 @@ package RedisDB
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aiscrm/redisgo"
+	"github.com/kevinu2/redisgo"
 	"github.com/spf13/viper"
 )
 
