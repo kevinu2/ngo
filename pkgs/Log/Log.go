@@ -2,8 +2,7 @@ package Log
 
 import (
 	"fmt"
-	"github.com/kevinu2/ngo/constant"
-	"github.com/kevinu2/ngo/enum"
+	"github.com/kevinu2/ngo2/Constant"
 	rotates "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -65,7 +64,7 @@ func (l *Log) initLogger(level zapcore.Level) {
 
 	encoder := zapcore.NewConsoleEncoder(zapcore.EncoderConfig{
 		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString(t.Format(constant.TimeUtcFormat))
+			enc.AppendString(t.Format(Constant.TimeUtcFormat))
 		},
 		MessageKey:   "msg",
 		LevelKey:     "level",
@@ -78,16 +77,16 @@ func (l *Log) initLogger(level zapcore.Level) {
 	})
 
 	switch l.Config.LogOutput {
-	case enum.LogOutputStd.Type():
+	case LogOutputStd.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
 		)
-	case enum.LogOutputFile.Type():
+	case LogOutputFile.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.Config.LogPath, l.Config.LogFile))), level),
 		)
 		//logger := zap.NewDevelopment()
-	case enum.LogOutputBoth.Type():
+	case LogOutputBoth.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
 			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.Config.LogPath, l.Config.LogFile))), level),
@@ -103,25 +102,25 @@ func (l *Log) initLogger(level zapcore.Level) {
 
 func (l *Log) initLoggerLevel() {
 	switch l.Config.LogLevel {
-	case enum.LogDebug.Level():
+	case LogDebug.Level():
 		l.initLogger(zapcore.DebugLevel)
 		return
-	case enum.LogInfo.Level():
+	case LogInfo.Level():
 		l.initLogger(zapcore.InfoLevel)
 		return
-	case enum.LogWarn.Level():
+	case LogWarn.Level():
 		l.initLogger(zapcore.WarnLevel)
 		return
-	case enum.LogError.Level():
+	case LogError.Level():
 		l.initLogger(zapcore.ErrorLevel)
 		return
-	case enum.LogDPanic.Level():
+	case LogDPanic.Level():
 		l.initLogger(zapcore.DPanicLevel)
 		return
-	case enum.LogPanic.Level():
+	case LogPanic.Level():
 		l.initLogger(zapcore.PanicLevel)
 		return
-	case enum.LogFatal.Level():
+	case LogFatal.Level():
 		l.initLogger(zapcore.FatalLevel)
 		return
 	default:
