@@ -58,8 +58,8 @@ func (r *DB) initDB() {
 			Db:          r.Config.DbName,
 			MaxActive:   r.Config.DbMaxActive,
 			MaxIdle:     r.Config.DbMaxIdle,
-			IdleTimeout: viper.GetInt("redis.pool.idle-timeout"),
-			Prefix:      viper.GetString("redis.prefix"),
+			IdleTimeout: r.Config.DbIdleTimeout,
+			Prefix:      r.Config.Prefix,
 			Marshal:     json.Marshal,
 			Unmarshal:   json.Unmarshal,
 		})
