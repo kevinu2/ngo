@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kevinu2/redisgo"
-	"github.com/spf13/viper"
 )
 
 var r *DB
