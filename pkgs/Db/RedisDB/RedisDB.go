@@ -22,18 +22,16 @@ func New() *DB {
 	return new(DB)
 }
 
-func AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime string, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
-	r.AddConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout)
+func AddConfig(dbUser, dbPass, dbHost string, dbPort int, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
+	r.AddConfig(dbUser, dbPass, dbHost, dbPort, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout)
 }
-func (r *DB) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime string, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
+func (r *DB) AddConfig(dbUser, dbPass, dbHost string, dbPort int, dbName, dbMaxIdle, dbMaxActive, dbIdleTimeout int) {
 	r.Config = &RedisConfig{
 		DbUser:        dbUser,
 		DbPass:        dbPass,
 		DbHost:        dbHost,
 		DbPort:        dbPort,
-		DbType:        dbType,
 		DbName:        dbName,
-		DbTimeZone:    dbTime,
 		DbMaxIdle:     dbMaxIdle,
 		DbMaxActive:   dbMaxActive,
 		DbIdleTimeout: dbIdleTimeout,
@@ -59,7 +57,6 @@ func (r *DB) initDB() {
 			MaxActive:   r.Config.DbMaxActive,
 			MaxIdle:     r.Config.DbMaxIdle,
 			IdleTimeout: r.Config.DbIdleTimeout,
-			Prefix:      r.Config.Prefix,
 			Marshal:     json.Marshal,
 			Unmarshal:   json.Unmarshal,
 		})
