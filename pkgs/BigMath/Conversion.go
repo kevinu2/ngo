@@ -3,7 +3,7 @@ package BigMath
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
-	"ngo/Constant"
+	"ngo2/Constant"
 	"strings"
 )
 

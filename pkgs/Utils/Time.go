@@ -2,7 +2,7 @@ package Utils
 
 import (
 	"fmt"
-	"ngo/Constant"
+	"ngo2/Constant"
 	"time"
 )
 
