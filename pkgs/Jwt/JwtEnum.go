@@ -14,7 +14,7 @@ const (
 	ErrorTokenExpire
 	ErrorRequestExpire
 	ErrorTokenSet
-	ErrorAuthErr
+	ErrorNoPrivileges
 )
 
 func (et ErrorType) GetMsg(c *gin.Context, msg string) *gin.Context {
@@ -37,7 +37,7 @@ func (et ErrorType) GetMsg(c *gin.Context, msg string) *gin.Context {
 	case ErrorTokenSet:
 		c.JSON(401, Http.Response{Err: Http.Error{Code: 401, Msg: "授权失败", Result: msg}, Result: Http.NoResult})
 		return c
-	case ErrorAuthErr:
+	case ErrorNoPrivileges:
 		c.JSON(403, Http.Response{Err: Http.Error{Code: 403, Msg: "权限不足，请联系管理员", Result: msg}, Result: Http.NoResult})
 		return c
 	default:
