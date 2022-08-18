@@ -6,6 +6,7 @@ type Response struct {
 }
 
 type RightResponse struct {
+	Err    Error       `json:"error"`
 	Result interface{} `json:"result"`
 }
 
