@@ -15,7 +15,8 @@ const (
 )
 
 var (
-	NoError = Error{Code: 0, Msg: "success", Result: ""}
+	NoError  = Error{Code: 0, Msg: "success", Result: ""}
+	NoResult = ""
 )
 
 var (
