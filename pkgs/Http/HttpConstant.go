@@ -15,6 +15,11 @@ const (
 )
 
 var (
+	NoError  = Error{Code: 0, Msg: "success", Result: ""}
+	NoResult = ""
+)
+
+var (
 	NeedInvitationCode1005       = 1005  //需要邀请码
 	DbError1999                  = 1999  //数据库错误
 	EmailFormatErr2000           = 2000  //邮箱格式错误
