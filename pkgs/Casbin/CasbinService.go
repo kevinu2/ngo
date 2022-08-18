@@ -19,6 +19,7 @@ type Casbin struct {
 	Enforcer *casbin.Enforcer
 	GormDB   *gorm.DB
 	Table    string
+	Prefix   string
 }
 
 func init() {
@@ -30,15 +31,20 @@ func New() *Casbin {
 }
 
 func (c *Casbin) New() *Casbin {
+	if c != nil {
+		return c
+	}
 	v := new(Casbin)
 	return v
 }
-func AddConfig(gorm *gorm.DB, table string) {
-	c.AddConfig(gorm, table)
+func AddConfig(gorm *gorm.DB, table, prefix string) {
+	c.AddConfig(gorm, table, prefix)
 }
-func (c *Casbin) AddConfig(gorm *gorm.DB, table string) {
+func (c *Casbin) AddConfig(gorm *gorm.DB, table, prefix string) {
 	c.GormDB = gorm
 	c.Table = table
+	c.Prefix = prefix
+	c.Enforcer, _ = c.GetCasbin()
 }
 
 func GetCasbin() (*casbin.Enforcer, error) { return c.GetCasbin() }
@@ -55,7 +61,6 @@ func (c *Casbin) GetCasbin() (*casbin.Enforcer, error) {
 		return c.Enforcer, Error.ErrorNotMatch.GetMsg(err.Error())
 	}
 	_ = e.LoadPolicy()
-	c.Enforcer = e
 	return c.Enforcer, nil
 }
 
