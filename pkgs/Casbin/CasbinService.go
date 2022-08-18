@@ -25,15 +25,11 @@ func init() {
 	c = New()
 }
 
-func GetNewCasbin() *Casbin {
-	if c != nil {
-		return c
-	}
-	c = New()
-	return c
+func New() *Casbin {
+	return c.New()
 }
 
-func New() *Casbin {
+func (c *Casbin) New() *Casbin {
 	v := new(Casbin)
 	return v
 }
