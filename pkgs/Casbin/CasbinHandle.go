@@ -2,8 +2,8 @@ package Casbin
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/kevinu2/ngo2/Default"
 	"github.com/kevinu2/ngo2/pkgs/Jwt"
-	"ngo2/Constant"
 	"strings"
 )
 
@@ -27,7 +27,7 @@ func (c *Casbin) CasbinHandler() gin.HandlerFunc {
 		if enforceRs {
 			context.Next()
 		} else {
-			Jwt.ErrorNoPrivileges.GetMsg(context, Constant.DefaultEmpty).Abort()
+			Jwt.ErrorNoPrivileges.GetMsg(context, Default.DefaultEmpty).Abort()
 			return
 		}
 

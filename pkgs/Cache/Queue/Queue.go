@@ -30,7 +30,7 @@ func (q Queue) Consume() (string, error) {
 		} else {
 			if rs == nil {
 				continue
-				//return Constant.DEFAULT_EMPTY, enum.ErrorQueueEmpty.GetMsg("q.QueueName")
+				//return Default.DEFAULT_EMPTY, enum.ErrorQueueEmpty.GetMsg("q.QueueName")
 			} else {
 				return r.String(rs, err)
 			}
