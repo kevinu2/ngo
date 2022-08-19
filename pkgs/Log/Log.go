@@ -2,7 +2,7 @@ package Log
 
 import (
 	"fmt"
-	"github.com/kevinu2/ngo2/Constant"
+	"github.com/kevinu2/ngo2/pkgs/Default"
 	rotates "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -64,7 +64,7 @@ func (l *Log) initLogger(level zapcore.Level) {
 
 	encoder := zapcore.NewConsoleEncoder(zapcore.EncoderConfig{
 		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString(t.Format(Constant.TimeUtcFormat))
+			enc.AppendString(t.Format(Default.TimeUtcFormat))
 		},
 		MessageKey:   "msg",
 		LevelKey:     "level",

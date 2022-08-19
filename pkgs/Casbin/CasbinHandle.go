@@ -2,7 +2,7 @@ package Casbin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kevinu2/ngo2/Default"
+	"github.com/kevinu2/ngo2/pkgs/Default"
 	"github.com/kevinu2/ngo2/pkgs/Jwt"
 	"strings"
 )

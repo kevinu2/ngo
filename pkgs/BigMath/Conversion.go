@@ -2,7 +2,7 @@ package BigMath
 
 import (
 	"fmt"
-	"github.com/kevinu2/ngo2/Default"
+	"github.com/kevinu2/ngo2/pkgs/Default"
 	"github.com/shopspring/decimal"
 	"strings"
 )
