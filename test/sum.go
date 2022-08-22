@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	data := []byte("敏感信息/重要文件泄漏[")
+	data := []byte("测试文字")
 	h1 := adler32.Checksum(data)
 	h2 := crc32.ChecksumIEEE(data)
 	h3 := md5.Sum(data)
