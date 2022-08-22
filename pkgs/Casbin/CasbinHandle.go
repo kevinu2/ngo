@@ -23,6 +23,7 @@ func (c *Casbin) CasbinHandler() gin.HandlerFunc {
 		if waitUse.AppRights == Admin {
 			sub = AdminSub
 		}
+		_ = c.GetCasbin()
 		enforceRs, _ := c.Enforcer.Enforce(sub, realObj, act)
 		if enforceRs {
 			context.Next()

@@ -13,8 +13,6 @@ import (
 
 var c *Casbin
 
-const path = "rbac_model.conf"
-
 type Casbin struct {
 	Enforcer *casbin.Enforcer
 	GormDB   *gorm.DB
@@ -44,24 +42,24 @@ func (c *Casbin) AddConfig(gorm *gorm.DB, table, prefix string) {
 	c.GormDB = gorm
 	c.Table = table
 	c.Prefix = prefix
-	c.Enforcer, _ = c.GetCasbin()
 }
 
-func GetCasbin() (*casbin.Enforcer, error) { return c.GetCasbin() }
-func (c *Casbin) GetCasbin() (*casbin.Enforcer, error) {
+func GetCasbin() error { return c.GetCasbin() }
+func (c *Casbin) GetCasbin() error {
 	if c.Enforcer != nil {
-		return c.Enforcer, nil
+		return nil
 	}
 	a, err := gormAdapter.NewAdapterByDB(c.GormDB)
 	if err != nil {
-		return c.Enforcer, Error.ErrorNotFound.GetMsg(err.Error())
+		return Error.ErrorNotFound.GetMsg(err.Error())
 	}
-	e, err := casbin.NewEnforcer("rbac_model.conf", a)
+	c.Enforcer, err = casbin.NewEnforcer("./Casbin/rbac_model.conf", a)
 	if err != nil {
-		return c.Enforcer, Error.ErrorNotMatch.GetMsg(err.Error())
+		return Error.ErrorNotMatch.GetMsg(err.Error())
 	}
-	_ = e.LoadPolicy()
-	return c.Enforcer, nil
+	c.Enforcer.LoadPolicy()
+	c.Enforcer.EnableLog(true)
+	return nil
 }
 
 func UpdateCasbinAuths(authInfos []CasbinAuthInfo, roleId int, tx *gorm.DB) error {
@@ -102,7 +100,7 @@ func BatchSaveCasbinAuth(conn *gorm.DB, authInfos []CasbinAuthInfo) error {
 }
 func (c *Casbin) BatchSaveCasbinAuth(conn *gorm.DB, authInfos []CasbinAuthInfo) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("insert into %s(p_type,ptype,v0,v1,v2) values", c.Table)
+	sql := fmt.Sprintf("insert into %s(ptype,p_type,v0,v1,v2) values", c.Table)
 	if _, err := buffer.WriteString(sql); err != nil {
 		return err
 	}
@@ -130,13 +128,12 @@ func (c *Casbin) AddCasbinAuth(authInfo CasbinAuthInfo) error {
 		cs CasbinModel
 		n  int64
 	)
-	err := c.GormDB.Table(c.Table).Where("v0 = ? AND v1 = ? AND v3 = ?", authInfo.AuthorityId, authInfo.Url, authInfo.Method).Find(&cs).Count(&n).Error
+	err := c.GormDB.Table(c.Table).Where("v0 = ? AND v1 = ? AND v2 = ?", authInfo.AuthorityId, authInfo.Url, authInfo.Method).Find(&cs).Count(&n).Error
 	if err != nil {
 		return Error.ErrorNotFound.GetMsg(err.Error())
 	}
 	if n > 0 {
 		return Error.ErrorNotRequired.GetMsg("")
-
 	}
 	if strings.TrimSpace(authInfo.PType) == `` {
 		cs.PType = `p`
@@ -169,7 +166,6 @@ func (c *Casbin) UpdateUserCasbin(authorityId string, casbinInfos []CasbinInfo) 
 		addFlag := c.AddUserCasbin(cm)
 		if addFlag == false {
 			return Error.ErrorNotRequired.GetMsg("")
-
 		}
 	}
 	return nil
@@ -228,9 +224,29 @@ func (c *Casbin) DeleteCasbinAuthById(id string) error {
 
 func (c *Casbin) MatchRoleCasbinRule(param CheckAuthParam) error {
 	conn := c.GormDB.Table(c.Table)
-	rows := conn.Where("vo = ? and v1 = ? and v2 = ?", param.RuleId, param.Url, param.Method).RowsAffected
+	rows := conn.Where("v0 = ? and v1 = ? and v2 = ?", param.RuleId, param.Url, param.Method).RowsAffected
 	if rows <= 0 {
 		return Error.ErrorNotFound.GetMsg("")
 	}
 	return nil
+}
+
+func (c *Casbin) GetPolicyPathByAuthId(authorityId string) (pathMaps []CasbinInfo) {
+	list := c.Enforcer.GetFilteredPolicy(0, authorityId)
+	for _, v := range list {
+		pathMaps = append(pathMaps, CasbinInfo{
+			Url:    v[1],
+			Method: v[2],
+		})
+	}
+	return pathMaps
+}
+
+func (c *Casbin) MatchCasbinAuth(param CheckAuthParam) error {
+	enforceRs, _ := c.Enforcer.Enforce(param.RuleId, param.Url, param.Method)
+	if enforceRs { //sub 实体，obj资源，act方法
+		return nil
+	} else {
+		return Error.ErrorNotFound.GetMsg("")
+	}
 }
