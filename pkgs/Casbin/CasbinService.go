@@ -7,17 +7,21 @@ import (
 	gormAdapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/kevinu2/ngo2/pkgs/Error"
 	"gorm.io/gorm"
+	"io"
+	"os"
 	"strconv"
 	"strings"
 )
 
 var c *Casbin
+var path string
 
 type Casbin struct {
-	Enforcer *casbin.Enforcer
-	GormDB   *gorm.DB
-	Table    string
-	Prefix   string
+	Enforcer   *casbin.Enforcer
+	GormDB     *gorm.DB
+	Table      string
+	Prefix     string
+	ConfigFile string
 }
 
 func init() {
@@ -33,6 +37,22 @@ func (c *Casbin) New() *Casbin {
 		return c
 	}
 	v := new(Casbin)
+	//加载配置文件
+	path = "/tmp/rbac_model.conf"
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		f, err := os.Create(path)
+		if err != nil {
+			Error.ErrorExpired.Get(err.Error())
+			return v
+		}
+		_, err = io.WriteString(f, Content)
+		if err != nil {
+			Error.ErrorExpired.Get(err.Error())
+			return v
+		}
+	}
+	v.ConfigFile = path
 	return v
 }
 func AddConfig(gorm *gorm.DB, table, prefix string) {
@@ -53,7 +73,7 @@ func (c *Casbin) GetCasbin() error {
 	if err != nil {
 		return Error.ErrorNotFound.GetMsg(err.Error())
 	}
-	c.Enforcer, err = casbin.NewEnforcer("./Casbin/rbac_model.conf", a)
+	c.Enforcer, err = casbin.NewEnforcer(c.ConfigFile, a)
 	if err != nil {
 		return Error.ErrorNotMatch.GetMsg(err.Error())
 	}
