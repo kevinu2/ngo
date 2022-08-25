@@ -1,7 +1,7 @@
 package Http
 
 type Response struct {
-	Err    Error       `json:"error"`
+	Err    Error       `json:"err"`
 	Result interface{} `json:"result"`
 }
 
