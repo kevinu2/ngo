@@ -40,7 +40,7 @@ func (r *DB) AddConfig(dbUser, dbPass, dbHost string, dbPort int, dbName, dbMaxI
 func GetDB() *redisgo.Cacher { return r.GetDB() }
 func (r *DB) GetDB() *redisgo.Cacher {
 	if r.RedisDB == nil {
-		fmt.Printf("Redis: initDB()!")
+		fmt.Print("Redis: initDB()! \n")
 		r.initDB()
 	}
 	return r.RedisDB
