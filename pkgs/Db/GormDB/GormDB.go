@@ -46,7 +46,7 @@ func (g *Gorm) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTi
 func GetDB() *gorm.DB { return g.GetDB() }
 func (g *Gorm) GetDB() *gorm.DB {
 	if g.GormDB == nil {
-		fmt.Printf("Gorm: initDB()!")
+		fmt.Print("Gorm: initDB()! \n")
 		g.initDB()
 	}
 	return g.GormDB
