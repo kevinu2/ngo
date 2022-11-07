@@ -20,7 +20,6 @@ func (dt DbType) GetType() string {
 		return "clickhouse"
 
 	default:
-		return DefaultEmpty
-
+		return Default.DefaultEmpty
 	}
 }
