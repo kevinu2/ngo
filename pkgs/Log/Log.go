@@ -53,7 +53,7 @@ func Logger() *zap.SugaredLogger {
 }
 func (l *Log) GetLogger() *zap.SugaredLogger {
 	if l.SugaredLogger == nil {
-		fmt.Printf("Log: initLogger()!")
+		fmt.Print("Log: initLogger()! \n")
 		l.initLoggerLevel()
 	}
 	return l.SugaredLogger
