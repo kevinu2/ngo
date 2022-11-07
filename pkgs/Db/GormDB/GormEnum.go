@@ -1,6 +1,6 @@
 package GormDB
 
-import "github.com/kevinu2/ngo/constant"
+import "github.com/kevinu2/ngo2/pkgs/Default"
 
 type DbType uint8
 
@@ -20,7 +20,7 @@ func (dt DbType) GetType() string {
 		return "clickhouse"
 
 	default:
-		return constant.DefaultEmpty
+		return DefaultEmpty
 
 	}
 }
