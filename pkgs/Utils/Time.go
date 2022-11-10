@@ -97,3 +97,8 @@ func NextTurnTime(inTime time.Time, period int64) time.Time {
 func NextTurnDuration(inTime time.Time, period int64) time.Duration {
 	return NextTurnTime(inTime, period).Sub(inTime)
 }
+
+func Utc2Local(utcTime time.Time, location string) time.Time {
+	loc, _ := time.LoadLocation(location) 
+	return utcTime.In(loc)
+}
