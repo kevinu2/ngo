@@ -2,7 +2,7 @@ package Utils
 
 import (
 	"encoding/json"
-	"ngo2/pkgs/BigMath"
+	"github.com/kevinu2/ngo2/pkgs/BigMath"
 )
 
 func I18nString(universal, i18n, lang string) string {
