@@ -5,7 +5,10 @@ import (
 	"github.com/kevinu2/ngo2/pkgs/BigMath"
 )
 
-func I18nString(universal, i18n, lang string) string {
+type I18n struct {
+}
+
+func (I18n) String (universal, i18n, lang string) string {
 	i18nMap := make(map[string]string)
 	err := json.Unmarshal([]byte(i18n), &i18nMap)
 	if err != nil {
@@ -17,7 +20,7 @@ func I18nString(universal, i18n, lang string) string {
 	return universal
 }
 
-func I18nByPN(numberStr, universalPositive, i18nPositive, universalNegative, i18nNegative, lang string) string {
+func (I18n) ByPN (numberStr, universalPositive, i18nPositive, universalNegative, i18nNegative, lang string) string {
 	if BigMath.Gt(numberStr, "0") {
 		return I18nString(universalPositive, i18nPositive, lang)
 	} else if BigMath.Lt(numberStr, "0") {
