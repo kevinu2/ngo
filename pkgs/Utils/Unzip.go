@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 )
 
-Type Zip struct {
+type Zip struct {
 }
 
 func (Zip) UnzipByte(data []byte) (unzipData []byte, err error) {
