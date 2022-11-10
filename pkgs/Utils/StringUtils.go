@@ -1,6 +1,6 @@
 package Utils
 
-type Strings struck {
+type Strings struct {
 }
 
 func (Strings) Reverse(vS string) string {
