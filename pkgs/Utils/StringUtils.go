@@ -1,6 +1,9 @@
 package Utils
 
-func Reverse(vS string) string {
+type Strings struck {
+}
+
+func (Strings) Reverse(vS string) string {
 	bytes := []rune(vS)
 	for from, to := 0, len(bytes)-1; from < to; from, to = from+1, to-1 {
 		bytes[from], bytes[to] = bytes[to], bytes[from]
@@ -8,11 +11,11 @@ func Reverse(vS string) string {
 	return string(bytes)
 }
 
-func IsEmpty(vS string) bool {
+func (Strings) IsEmpty(vS string) bool {
 	return vS == ""
 }
 
-func ZeroAdd(vStr string, zeroLen int64) string {
+func (Strings) ZeroAdd(vStr string, zeroLen int64) string {
 	var (
 		n       int64
 		zeroStr = ""
