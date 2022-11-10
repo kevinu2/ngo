@@ -6,7 +6,10 @@ import (
 	"io/ioutil"
 )
 
-func UnzipByte(data []byte) (unzipData []byte, err error) {
+Type Zip struct {
+}
+
+func (Zip) UnzipByte(data []byte) (unzipData []byte, err error) {
 	if len(data) == 0 {
 		return
 	}
