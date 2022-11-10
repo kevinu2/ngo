@@ -16,9 +16,3 @@ const (
 
 	DayBySecond = int64(24 * 60 * 60)
 )
-
-
-func Utc2Localtime(utcTime time.Time, location string) time.Time {
-	loc, _ := time.LoadLocation(location) #"Asia/Shanghai"
-	return utcTime.In(loc)
-}
