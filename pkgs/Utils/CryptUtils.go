@@ -45,7 +45,7 @@ func (Crypt) Hmac(v string) string {
 }
 
 func (Crypt) UUID() string {
-	ui := uuid.Must(uuid.NewV4(), nil)
+	ui := uuid.Must(uuid.NewV4())
 	return ui.String()
 }
 
@@ -84,7 +84,7 @@ func (Crypt) DecodeInvitation(invitationCode string) int64 {
 	length := int64(len(InvitationKey))
 	startIndex := strings.LastIndex(invitationCode, "0") + 1
 	code := invitationCode[startIndex:len(invitationCode)]
-	code = Reverse(code)
+	code = Strings{}.Reverse(code)
 	var num int64
 	for i := 0; i < len(code); i++ {
 		index := strings.Index(InvitationKey, string(code[i]))

@@ -61,7 +61,7 @@ func (Time) UnixPoint(unixTime int64, period int64) int64 {
 	if period == 0 || period%60 != 0 {
 		return unixTime
 	}
-	inTime, err := time.Parse(Default.TimeUtcFormat, UnixTimeCovert(unixTime).UtcTime)
+	inTime, err := time.Parse(Default.TimeUtcFormat, Time{}.UnixCovert(unixTime).UtcTime)
 	if err != nil {
 		return unixTime
 	}
@@ -98,10 +98,10 @@ func (Time) NextTurn(inTime time.Time, period int64) time.Time {
 }
 
 func (Time) NextTurnDuration(inTime time.Time, period int64) time.Duration {
-	return NextTurnTime(inTime, period).Sub(inTime)
+	return Time{}.NextTurn(inTime, period).Sub(inTime)
 }
 
 func (Time) Utc2Local(utcTime time.Time, location string) time.Time {
-	loc, _ := time.LoadLocation(location) 
+	loc, _ := time.LoadLocation(location)
 	return utcTime.In(loc)
 }
