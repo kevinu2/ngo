@@ -13,12 +13,15 @@ const (
 	sec   int = 10
 )
 
+type Time struct {
+}
+
 type TimeResult struct {
 	UtcTime  string
 	UnixTime int64
 }
 
-func UnixTimeCovert(unixTime int64) TimeResult {
+func (Time) UnixCovert(unixTime int64) TimeResult {
 	var t time.Time
 	switch len(fmt.Sprintf("%d", unixTime)) {
 	case nano:
@@ -39,7 +42,7 @@ func UnixTimeCovert(unixTime int64) TimeResult {
 	return TimeResult{UtcTime: t.UTC().Format(Default.TimeUtcFormat), UnixTime: t.Unix()}
 }
 
-func UnixTimeOffset(unixTime int64, offset int64) int64 {
+func (Time) UnixOffset(unixTime int64, offset int64) int64 {
 	switch len(fmt.Sprintf("%d", unixTime)) {
 	case nano:
 		return unixTime + int64(time.Nanosecond*time.Duration(offset)*1e9)
@@ -54,7 +57,7 @@ func UnixTimeOffset(unixTime int64, offset int64) int64 {
 	}
 }
 
-func UnixPointTime(unixTime int64, period int64) int64 {
+func (Time) UnixPoint(unixTime int64, period int64) int64 {
 	if period == 0 || period%60 != 0 {
 		return unixTime
 	}
@@ -76,7 +79,7 @@ func UnixPointTime(unixTime int64, period int64) int64 {
 	}
 }
 
-func NextTurnTime(inTime time.Time, period int64) time.Time {
+func (Time) NextTurn(inTime time.Time, period int64) time.Time {
 	//60 300 900
 	if period%60 != 0 {
 		return time.Time{}
@@ -94,11 +97,11 @@ func NextTurnTime(inTime time.Time, period int64) time.Time {
 	}
 }
 
-func NextTurnDuration(inTime time.Time, period int64) time.Duration {
+func (Time) NextTurnDuration(inTime time.Time, period int64) time.Duration {
 	return NextTurnTime(inTime, period).Sub(inTime)
 }
 
-func UtcTime2LocalTime(utcTime time.Time, location string) time.Time {
+func (Time) Utc2Local(utcTime time.Time, location string) time.Time {
 	loc, _ := time.LoadLocation(location) 
 	return utcTime.In(loc)
 }
