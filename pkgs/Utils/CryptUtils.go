@@ -45,7 +45,7 @@ func (Crypt) Hmac(v string) string {
 }
 
 func (Crypt) UUID() string {
-	ui := uuid.Must(uuid.NewV4())
+	ui := uuid.Must(uuid.NewV4(), nil)
 	return ui.String()
 }
 
