@@ -25,24 +25,6 @@ func New() *Gorm {
 	return new(Gorm)
 }
 
-func AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName string, dbMaxIdle, dbMaxOpen, dbMaxLifeTime int) {
-	g.AddConfig(dbType, dbUser, dbPass, dbHost, dbPort, dbTime, dbName, dbMaxIdle, dbMaxOpen, dbMaxLifeTime)
-}
-func (g *Gorm) AddConfig(dbType, dbUser, dbPass, dbHost string, dbPort int, dbTime, dbName string, dbMaxIdle, dbMaxOpen, dbMaxLifeTime int) {
-	g.Config = &GormConfig{
-		DbUser:        dbUser,
-		DbPass:        dbPass,
-		DbHost:        dbHost,
-		DbPort:        dbPort,
-		DbType:        dbType,
-		DbName:        dbName,
-		DbTimeZone:    dbTime,
-		DbMaxIdle:     dbMaxIdle,
-		DbMaxOpen:     dbMaxOpen,
-		DbMaxLifeTime: dbMaxLifeTime,
-	}
-}
-
 func GetDB() *gorm.DB { return g.GetDB() }
 func (g *Gorm) GetDB() *gorm.DB {
 	if g.GormDB == nil {
@@ -58,9 +40,16 @@ func (g *Gorm) initDB() {
 		err error
 	)
 
+	if g.Config == nil {
+		panic(errors.New("Gorm.Config is nil"))
+	}
+	_, err = time.LoadLocation(g.Config.DbTimeZone)
+	if err != nil {
+		g.Config.DbTimeZone = "UTC"
+	}
 	switch g.Config.DbType {
 	case DbPostgres.GetType():
-		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s  sslmode=disable TimeZone=%s dbname=%s", g.Config.DbHost, g.Config.DbPort, g.Config.DbUser, g.Config.DbPass, "UTC", g.Config.DbName)
+		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s  sslmode=disable TimeZone=%s dbname=%s", g.Config.DbHost, g.Config.DbPort, g.Config.DbUser, g.Config.DbPass, g.Config.DbTimeZone, g.Config.DbName)
 		db, err = gorm.Open(
 			postgres.New(postgres.Config{
 				DSN:                  dsn,
@@ -70,7 +59,7 @@ func (g *Gorm) initDB() {
 			panic("Failed to connect to DB: " + err.Error())
 		}
 	case DbMySQL.GetType():
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=%s", g.Config.DbUser, g.Config.DbPass, g.Config.DbHost, g.Config.DbPort, g.Config.DbName, "UTC")
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=%s", g.Config.DbUser, g.Config.DbPass, g.Config.DbHost, g.Config.DbPort, g.Config.DbName, g.Config.DbTimeZone)
 		db, err = gorm.Open(
 
 			mysql.New(mysql.Config{
