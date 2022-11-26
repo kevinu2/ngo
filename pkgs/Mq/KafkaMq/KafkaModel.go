@@ -5,7 +5,7 @@ type MQueueMsg struct {
 	Msg   string
 }
 
-type KafkaConfig struct {
+type Config struct {
 	Topic []string `json:"topic"`
 	Host  []string `json:"host"`
 	Group string   `json:"group"`
