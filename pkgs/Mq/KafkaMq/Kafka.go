@@ -24,17 +24,19 @@ func (m *MsgQueue) New() *MsgQueue {
 	return v
 }
 
-func AddConsumer(topic, host []string, group string, service ConsumerI) {
-	m.AddConsumer(topic, host, group, service)
-}
-func (m *MsgQueue) AddConsumer(topic, host []string, group string, service ConsumerI) {
-	m.Service = service
+func AddConfig(topic, host []string, group string) { m.AddConfig(topic, host, group) }
+func (m *MsgQueue) AddConfig(topic, host []string, group string) {
 	c := &Config{
 		Topic: topic,
 		Host:  host,
 		Group: group,
 	}
 	m.Config = c
+}
+
+func AddConsumer(service ConsumerI) { m.AddConsumer(service) }
+func (m *MsgQueue) AddConsumer(service ConsumerI) {
+	m.Service = service
 }
 
 func (m *MsgQueue) ConsumeLoop() {
