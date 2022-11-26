@@ -10,8 +10,8 @@ import (
 var m *MsgQueue
 
 type MsgQueue struct {
-	service ConsumerI
-	config  *KafkaConfig
+	Service ConsumerI
+	Config  *Config
 }
 
 func init() {
@@ -28,13 +28,13 @@ func AddConsumer(topic, host []string, group string, service ConsumerI) {
 	m.AddConsumer(topic, host, group, service)
 }
 func (m *MsgQueue) AddConsumer(topic, host []string, group string, service ConsumerI) {
-	m.service = service
-	c := KafkaConfig{
+	m.Service = service
+	c := Config{
 		Topic: topic,
 		Host:  host,
 		Group: group,
 	}
-	m.config = &c
+	m.Config = &c
 }
 
 func (m *MsgQueue) ConsumeLoop() {
@@ -52,7 +52,7 @@ func (m *MsgQueue) Consumer() {
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	// Init consumer, consume errors & messages
-	consumer, err := cluster.NewConsumer(m.config.Host, m.config.Group, m.config.Topic, config)
+	consumer, err := cluster.NewConsumer(m.Config.Host, m.Config.Group, m.Config.Topic, config)
 	if err != nil {
 		fmt.Printf("Failed to start consumer: %s", err)
 		return
@@ -66,7 +66,7 @@ func (m *MsgQueue) Consumer() {
 			var mqMsg MQueueMsg
 			mqMsg.Topic = msg.Topic
 			mqMsg.Msg = string(msg.Value)
-			m.service.Consume(mqMsg)
+			m.Service.Consume(mqMsg)
 
 			if more {
 				//fmt.Printf("%s/%d/%d\t%s\n", msg.Topic, msg.Partition, msg.Offset, msg.Value)
