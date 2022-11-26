@@ -86,3 +86,26 @@ func (m *MsgQueue) Consumer() {
 		}
 	}
 }
+
+func (m *MsgQueue) Producer(topic, msg string) error {
+	config := sarama.NewConfig()
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Return.Successes = true
+	config.Producer.Partitioner = sarama.NewRandomPartitioner
+
+	pMsg := &sarama.ProducerMessage{
+		Topic: topic,
+		Value: sarama.StringEncoder(msg),
+	}
+	producer, err := sarama.NewSyncProducer(m.Config.Host, config)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+		return err
+	}
+	defer producer.Close()
+	_, _, err = producer.SendMessage(pMsg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
