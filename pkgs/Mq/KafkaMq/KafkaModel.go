@@ -1,4 +1,4 @@
-package Mq
+package KafkaMq
 
 type MQueueMsg struct {
 	Topic string
@@ -6,8 +6,9 @@ type MQueueMsg struct {
 }
 
 type KafkaConfig struct {
-	Host    []string `json:"host"`
-	GroupId string   `json:"group_id"`
+	Topic []string `json:"topic"`
+	Host  []string `json:"host"`
+	Group string   `json:"group"`
 }
 
 type ConsumerI interface {
