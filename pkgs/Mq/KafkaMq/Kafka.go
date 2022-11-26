@@ -29,12 +29,12 @@ func AddConsumer(topic, host []string, group string, service ConsumerI) {
 }
 func (m *MsgQueue) AddConsumer(topic, host []string, group string, service ConsumerI) {
 	m.Service = service
-	c := Config{
+	c := &Config{
 		Topic: topic,
 		Host:  host,
 		Group: group,
 	}
-	m.Config = &c
+	m.Config = c
 }
 
 func (m *MsgQueue) ConsumeLoop() {
@@ -63,7 +63,7 @@ func (m *MsgQueue) Consumer() {
 	for {
 		select {
 		case msg, more := <-consumer.Messages():
-			var mqMsg MQueueMsg
+			var mqMsg Msg
 			mqMsg.Topic = msg.Topic
 			mqMsg.Msg = string(msg.Value)
 			m.Service.Consume(mqMsg)

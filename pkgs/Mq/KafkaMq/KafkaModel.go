@@ -1,6 +1,6 @@
 package KafkaMq
 
-type MQueueMsg struct {
+type Msg struct {
 	Topic string
 	Msg   string
 }
@@ -12,5 +12,5 @@ type Config struct {
 }
 
 type ConsumerI interface {
-	Consume(msg MQueueMsg)
+	Consume(msg Msg)
 }
