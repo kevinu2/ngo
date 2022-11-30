@@ -3,6 +3,8 @@ package Utils
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -52,4 +54,22 @@ func (stringsUtils) RandCode(width int) string {
 		fmt.Fprintf(&buffer, "%d", numeric[rand.Intn(r)])
 	}
 	return buffer.String()
+}
+
+func (stringsUtils) IsDigit(str string) bool {
+	_, err := strconv.ParseFloat(str, 64)
+	return err == nil
+}
+
+func (stringsUtils) IsLetter(str string) bool {
+	pattern := "^[A-Za-z]+$"
+	result, _ := regexp.MatchString(pattern, str)
+	return result
+}
+
+func (stringsUtils) IsEmail(email string) bool {
+	//pattern := `\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*` //匹配电子邮箱
+	pattern := `^[0-9a-z][_.0-9a-z-]{0,31}@([0-9a-z][0-9a-z-]{0,30}[0-9a-z]\.){1,4}[a-z]{2,4}$`
+	reg := regexp.MustCompile(pattern)
+	return reg.MatchString(email)
 }
