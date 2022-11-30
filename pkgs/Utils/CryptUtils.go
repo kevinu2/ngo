@@ -14,53 +14,57 @@ import (
 
 const InvitationKey = "E5aFbCDcGd3HeQAf4Bg1NiOjPhIkJ2lRSnTUmV67MWX89KLYZ"
 
-type Crypt struct {
+type crypt struct {
 }
 
-func (Crypt) Sha1(v string) string {
+func Crypt() crypt {
+	return crypt{}
+}
+
+func (crypt) Sha1(v string) string {
 	sha := sha1.New()
 	sha.Write([]byte(v))
 	bs := sha.Sum(nil)
 	return fmt.Sprintf("%x", bs)
 }
 
-func (Crypt) Sha3(v string) string {
+func (crypt) Sha3(v string) string {
 	sha := sha3.NewLegacyKeccak512()
 	sha.Write([]byte(v))
 	bs := sha.Sum(nil)
 	return fmt.Sprintf("%x", bs)
 }
 
-func (Crypt) Sha512(v string) string {
+func (crypt) Sha512(v string) string {
 	sha := sha512.New()
 	sha.Write([]byte(v))
 	bs := sha.Sum(nil)
 	return fmt.Sprintf("%x", bs)
 }
 
-func (Crypt) Hmac(v string) string {
+func (crypt) Hmac(v string) string {
 	hash := hmac.New(sha1.New, []byte(v))
 	bs := hash.Sum(nil)
 	return fmt.Sprintf("%x", bs)
 }
 
-func (Crypt) UUID() string {
+func (crypt) UUID() string {
 	ui := uuid.Must(uuid.NewV4())
 	return ui.String()
 }
 
-func (Crypt) MD5(v string) string {
+func (crypt) MD5(v string) string {
 	md := md5.New()
 	md.Write([]byte(v))
 	bs := md.Sum(nil)
 	return fmt.Sprintf("%x", bs)
 }
 
-func (Crypt) SessionId() string {
-	return Crypt{}.Sha1(Crypt{}.UUID())
+func (crypt) SessionId() string {
+	return Crypt().Sha1(Crypt().UUID())
 }
 
-func (Crypt) EncodeInvitation(userId uint64) string {
+func (crypt) EncodeInvitation(userId uint64) string {
 	length := uint64(len(InvitationKey))
 	num := userId
 	var code string
@@ -80,11 +84,11 @@ func (Crypt) EncodeInvitation(userId uint64) string {
 	return code
 }
 
-func (Crypt) DecodeInvitation(invitationCode string) int64 {
+func (crypt) DecodeInvitation(invitationCode string) int64 {
 	length := int64(len(InvitationKey))
 	startIndex := strings.LastIndex(invitationCode, "0") + 1
 	code := invitationCode[startIndex:len(invitationCode)]
-	code = Strings{}.Reverse(code)
+	code = Strings().Reverse(code)
 	var num int64
 	for i := 0; i < len(code); i++ {
 		index := strings.Index(InvitationKey, string(code[i]))
@@ -97,8 +101,8 @@ func (Crypt) DecodeInvitation(invitationCode string) int64 {
 	return num
 }
 
-func (Crypt) EncryptPwd(pwd string, salt string) string {
-	first := Crypt{}.Sha3(pwd)
-	second := Crypt{}.Sha3(first + salt)
-	return Crypt{}.MD5(second)
+func (crypt) EncryptPwd(pwd string, salt string) string {
+	first := Crypt().Sha3(pwd)
+	second := Crypt().Sha3(first + salt)
+	return Crypt().MD5(second)
 }

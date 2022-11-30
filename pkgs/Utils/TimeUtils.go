@@ -13,7 +13,11 @@ const (
 	sec   int = 10
 )
 
-type Time struct {
+type timeUtils struct {
+}
+
+func Time() timeUtils {
+	return timeUtils{}
 }
 
 type TimeResult struct {
@@ -21,7 +25,7 @@ type TimeResult struct {
 	UnixTime int64
 }
 
-func (Time) UnixCovert(unixTime int64) TimeResult {
+func (timeUtils) UnixCovert(unixTime int64) TimeResult {
 	var t time.Time
 	switch len(fmt.Sprintf("%d", unixTime)) {
 	case nano:
@@ -42,7 +46,7 @@ func (Time) UnixCovert(unixTime int64) TimeResult {
 	return TimeResult{UtcTime: t.UTC().Format(Default.TimeUtcFormat), UnixTime: t.Unix()}
 }
 
-func (Time) UnixOffset(unixTime int64, offset int64) int64 {
+func (timeUtils) UnixOffset(unixTime int64, offset int64) int64 {
 	switch len(fmt.Sprintf("%d", unixTime)) {
 	case nano:
 		return unixTime + int64(time.Nanosecond*time.Duration(offset)*1e9)
@@ -57,11 +61,11 @@ func (Time) UnixOffset(unixTime int64, offset int64) int64 {
 	}
 }
 
-func (Time) UnixPoint(unixTime int64, period int64) int64 {
+func (timeUtils) UnixPoint(unixTime int64, period int64) int64 {
 	if period == 0 || period%60 != 0 {
 		return unixTime
 	}
-	inTime, err := time.Parse(Default.TimeUtcFormat, Time{}.UnixCovert(unixTime).UtcTime)
+	inTime, err := time.Parse(Default.TimeUtcFormat, timeUtils{}.UnixCovert(unixTime).UtcTime)
 	if err != nil {
 		return unixTime
 	}
@@ -79,7 +83,7 @@ func (Time) UnixPoint(unixTime int64, period int64) int64 {
 	}
 }
 
-func (Time) NextTurn(inTime time.Time, period int64) time.Time {
+func (timeUtils) NextTurn(inTime time.Time, period int64) time.Time {
 	//60 300 900
 	if period%60 != 0 {
 		return time.Time{}
@@ -97,11 +101,11 @@ func (Time) NextTurn(inTime time.Time, period int64) time.Time {
 	}
 }
 
-func (Time) NextTurnDuration(inTime time.Time, period int64) time.Duration {
-	return Time{}.NextTurn(inTime, period).Sub(inTime)
+func (timeUtils) NextTurnDuration(inTime time.Time, period int64) time.Duration {
+	return timeUtils{}.NextTurn(inTime, period).Sub(inTime)
 }
 
-func (Time) Utc2Local(utcTime time.Time, location string) time.Time {
+func (timeUtils) Utc2Local(utcTime time.Time, location string) time.Time {
 	loc, _ := time.LoadLocation(location)
 	return utcTime.In(loc)
 }
