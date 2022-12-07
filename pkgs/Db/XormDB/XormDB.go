@@ -27,7 +27,7 @@ func New() *Xorm {
 
 func GetDB() *xorm.Engine { return x.GetDB() }
 func (x *Xorm) GetDB() *xorm.Engine {
-	if x.GetDB() == nil {
+	if x.XormDB == nil {
 		fmt.Print("Xorm: initDB()! \n")
 		x.initDB()
 	}
