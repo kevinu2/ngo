@@ -1,6 +1,6 @@
 package XormDB
 
-type XormConfig struct {
+type Config struct {
 	User        string
 	Pass        string
 	Host        string

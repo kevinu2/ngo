@@ -14,7 +14,7 @@ var x *Xorm
 
 type Xorm struct {
 	XormDB *xorm.Engine
-	Config *XormConfig
+	Config *Config
 }
 
 func init() {
@@ -42,38 +42,40 @@ func (x *Xorm) initDB() {
 	if x.Config == nil {
 		panic(errors.New("Xorm.Config is nil"))
 	}
-	c := x.Config
-	switch c.Type {
+	switch x.Config.Type {
 	case DbPostgres.GetType():
-		dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", c.User, c.Pass, c.Host, c.Port, c.Db)
+		dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+			x.Config.User, x.Config.Pass, x.Config.Host, x.Config.Port, x.Config.Db)
 		x.XormDB, err = xorm.NewEngine(DbPostgres.GetType(), dsn)
 		if err != nil {
 			fmt.Printf("xorm.NewEngine(%s, %s) fails, err: %s", DbPostgres.GetType(), dsn, err.Error())
 			panic(err)
 		}
 	case DbMySQL.GetType():
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%s&loc=%s", c.User, c.Pass, c.Host, c.Port, c.Db, c.CharSet, c.ParseTime, c.TimeZone)
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%s&loc=%s",
+			x.Config.User, x.Config.Pass, x.Config.Host, x.Config.Port, x.Config.Db, x.Config.CharSet, x.Config.ParseTime, x.Config.TimeZone)
 		db, err = xorm.NewEngine(DbMySQL.GetType(), dsn)
 		if err != nil {
 			fmt.Printf("xorm.NewEngine(%s, %s) fails, err: %s", DbMySQL.GetType(), dsn, err.Error())
 			panic(err)
 		}
 	default:
-		panic(errors.New("Unsupported DB Type: " + c.Type))
+		fmt.Println(x.Config)
+		panic(errors.New("Unsupported DB Type: " + x.Config.Type))
 	}
-	loc, err := time.LoadLocation(c.TimeZone)
+	loc, err := time.LoadLocation(x.Config.TimeZone)
 	if err != nil {
 		loc = time.UTC
 	}
 	db.SetTZLocation(loc)
 	db.SetTZDatabase(loc)
-	db.SetMaxIdleConns(c.MaxIdle)
-	db.SetMaxOpenConns(c.MaxOpen)
-	db.SetConnMaxLifetime(time.Duration(c.MaxLifeTime))
-	db.ShowSQL(c.ShowSQL)
+	db.SetMaxIdleConns(x.Config.MaxIdle)
+	db.SetMaxOpenConns(x.Config.MaxOpen)
+	db.SetConnMaxLifetime(time.Duration(x.Config.MaxLifeTime))
+	db.ShowSQL(x.Config.ShowSQL)
 	db.Logger().SetLevel(log.LOG_DEBUG)
 	db.SetMapper(names.GonicMapper{})
-	db.SetTableMapper(names.NewPrefixMapper(names.SnakeMapper{}, c.Prefix))
+	db.SetTableMapper(names.NewPrefixMapper(names.SnakeMapper{}, x.Config.Prefix))
 	db.SetSchema("anime")
 	err = db.Ping()
 	if err != nil {
