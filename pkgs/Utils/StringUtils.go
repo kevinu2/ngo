@@ -73,3 +73,8 @@ func (stringsUtils) IsEmail(email string) bool {
 	reg := regexp.MustCompile(pattern)
 	return reg.MatchString(email)
 }
+
+func (stringsUtils) Trim(str string) string {
+	reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+	return reg.ReplaceAllString(str, "")
+}
