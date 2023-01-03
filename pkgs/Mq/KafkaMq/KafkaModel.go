@@ -6,9 +6,10 @@ type Msg struct {
 }
 
 type Config struct {
-	Topic []string `json:"topic"`
-	Host  []string `json:"host"`
-	Group string   `json:"group"`
+	Topic      []string `json:"topic"`
+	Host       []string `json:"host"`
+	Group      string   `json:"group"`
+	AutoCommit bool     `json:"auto_commit"`
 }
 
 type ConsumerI interface {

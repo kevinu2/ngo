@@ -51,6 +51,7 @@ func (m *MsgQueue) Consumer() {
 	config := cluster.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Group.Return.Notifications = true
+	config.Consumer.Offsets.AutoCommit.Enable = m.Config.AutoCommit
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	// Init consumer, consume errors & messages
