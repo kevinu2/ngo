@@ -25,10 +25,10 @@ func (m *MsgQueue) New() *MsgQueue {
 	return v
 }
 
-func AddConfig(topic string, topics, host []string, group string, debug bool) {
+func AddConfig(topic map[string]string, topics, host []string, group string, debug bool) {
 	m.AddConfig(topic, topics, host, group, debug)
 }
-func (m *MsgQueue) AddConfig(topic string, topics, host []string, group string, debug bool) {
+func (m *MsgQueue) AddConfig(topic map[string]string, topics, host []string, group string, debug bool) {
 	c := &Config{
 		Topic:   topic,
 		Topics:  topics,
@@ -77,7 +77,9 @@ func (m *MsgQueue) Consumer() {
 			m.Service.Consume(mqMsg)
 
 			if more {
-				//fmt.Printf("%s/%d/%d\t%s\n", msg.Topics, msg.Partition, msg.Offset, msg.Value)
+				if m.Config.IsDebug {
+					fmt.Printf("%s/%d/%d\t%s\n", msg.Topic, string(msg.Value), msg.Partition, msg.Offset)
+				}
 				consumer.MarkOffset(msg, "")
 			}
 		case ntf, more := <-consumer.Notifications():
@@ -103,31 +105,36 @@ func (m *MsgQueue) AddProducer() sarama.AsyncProducer {
 	ap, err := sarama.NewAsyncProducer(m.Config.Host, config)
 	if err != nil {
 		fmt.Printf("sarama.NewSyncProducer fails, err %s \n", err.Error())
-		return nil
+		panic(err)
 	}
 	return ap
 
 }
 
-func (m *MsgQueue) Producer(message, topic string) {
+func (m *MsgQueue) Producer(message []byte, topic string) error {
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
-		Value: sarama.ByteEncoder([]byte(message)),
+		Value: sarama.ByteEncoder(message),
 	}
 	m.AsyncProducer.Input() <- msg
-	if m.Config.IsDebug {
-		fmt.Printf("Send succeed(%s) \n", message)
+	if <-m.AsyncProducer.Errors() != nil {
+		if m.Config.IsDebug {
+		}
+		fmt.Printf("Send fails (%s), err %s \n", message, <-m.AsyncProducer.Errors())
+		return <-m.AsyncProducer.Errors()
+	} else {
+		if m.Config.IsDebug {
+			fmt.Printf("Send succeed(%s) \n", message)
+		}
 	}
-	//if m.AsyncProducer.Errors() != nil {
-	//	fmt.Printf("Send fails (%s), err %s \n", message, m.AsyncProducer.Errors())
-	//} else {
-	//	if m.Config.IsDebug {
-	//		fmt.Printf("Send succeed(%s) \n", message)
-	//	}
-	//}
+	return nil
 }
 
-func (m *MsgQueue) SyncProducer(message []byte) error {
+func (m *MsgQueue) CloseProducer() {
+	m.AsyncProducer.AsyncClose()
+}
+
+func (m *MsgQueue) SyncProducer(message []byte, topic string) error {
 	//指定配置
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
@@ -141,18 +148,18 @@ func (m *MsgQueue) SyncProducer(message []byte) error {
 	}
 	defer p.Close()
 	msg := &sarama.ProducerMessage{
-		Topic: m.Config.Topic,
+		Topic: topic,
 		Value: sarama.ByteEncoder(message),
 	}
 	part, offset, err := p.SendMessage(msg)
 	if err != nil {
 		if m.Config.IsDebug {
-			fmt.Printf("Send fails (%s/%s), err %s \n", m.Config.Topic, message, err.Error())
+			fmt.Printf("Send fails (%s/%s), err %s \n", topic, message, err.Error())
 		}
 		return err
 	} else {
 		if m.Config.IsDebug {
-			fmt.Printf("Send succeed(%s/%s/%s/%s) \n", message, m.Config, part, offset)
+			fmt.Printf("Send succeed(%s/%s/%s/%s) \n", topic, message, part, offset)
 		}
 	}
 	return nil
