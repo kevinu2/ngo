@@ -134,7 +134,9 @@ func (m *MsgQueue) SyncProducer(message []byte) error {
 	config.Producer.Timeout = 5 * time.Second
 	p, err := sarama.NewSyncProducer(m.Config.Host, config)
 	if err != nil {
-		//fmt.Printf("sarama.NewSyncProducer (%v), err %s \n", m.Config.Host, err.Error())
+		if m.Config.IsDebug {
+			fmt.Printf("sarama.NewSyncProducer (%v), err %s \n", m.Config.Host, err.Error())
+		}
 		return err
 	}
 	defer p.Close()
@@ -144,7 +146,9 @@ func (m *MsgQueue) SyncProducer(message []byte) error {
 	}
 	part, offset, err := p.SendMessage(msg)
 	if err != nil {
-		//fmt.Printf("Send fails (%s/%s), err %s \n", m.Config.Topic, message, err.Error())
+		if m.Config.IsDebug {
+			fmt.Printf("Send fails (%s/%s), err %s \n", m.Config.Topic, message, err.Error())
+		}
 		return err
 	} else {
 		if m.Config.IsDebug {
