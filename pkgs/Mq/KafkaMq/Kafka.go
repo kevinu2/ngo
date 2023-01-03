@@ -100,26 +100,56 @@ func (m *MsgQueue) AddProducer() sarama.AsyncProducer {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.Timeout = 5 * time.Second
-	p, err := sarama.NewAsyncProducer(m.Config.Host, config)
+	ap, err := sarama.NewAsyncProducer(m.Config.Host, config)
 	if err != nil {
 		fmt.Printf("sarama.NewSyncProducer fails, err %s \n", err.Error())
 		return nil
 	}
-	return p
+	return ap
 
 }
 
 func (m *MsgQueue) Producer(message, topic string) {
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
-		Value: sarama.ByteEncoder(message),
+		Value: sarama.ByteEncoder([]byte(message)),
 	}
 	m.AsyncProducer.Input() <- msg
-	if m.AsyncProducer.Errors() != nil {
-		fmt.Printf("Send fails (%s), err %s \n", message, m.AsyncProducer.Errors())
+	if m.Config.IsDebug {
+		fmt.Printf("Send succeed(%s) \n", message)
+	}
+	//if m.AsyncProducer.Errors() != nil {
+	//	fmt.Printf("Send fails (%s), err %s \n", message, m.AsyncProducer.Errors())
+	//} else {
+	//	if m.Config.IsDebug {
+	//		fmt.Printf("Send succeed(%s) \n", message)
+	//	}
+	//}
+}
+
+func (m *MsgQueue) SyncProducer(message []byte) error {
+	//指定配置
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	config.Producer.Timeout = 5 * time.Second
+	p, err := sarama.NewSyncProducer(m.Config.Host, config)
+	if err != nil {
+		//fmt.Printf("sarama.NewSyncProducer (%v), err %s \n", m.Config.Host, err.Error())
+		return err
+	}
+	defer p.Close()
+	msg := &sarama.ProducerMessage{
+		Topic: m.Config.Topic,
+		Value: sarama.ByteEncoder(message),
+	}
+	part, offset, err := p.SendMessage(msg)
+	if err != nil {
+		//fmt.Printf("Send fails (%s/%s), err %s \n", m.Config.Topic, message, err.Error())
+		return err
 	} else {
 		if m.Config.IsDebug {
-			fmt.Printf("Send succeed(%s) \n", message)
+			fmt.Printf("Send succeed(%s/%s/%s/%s) \n", message, m.Config, part, offset)
 		}
 	}
+	return nil
 }
