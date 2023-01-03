@@ -53,11 +53,44 @@ func (m *MsgQueue) ConsumeLoop() {
 }
 
 func (m *MsgQueue) Consumer() {
+	var err error
+	dc := DefaultConsumerConfig()
 	config := cluster.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Group.Return.Notifications = true
-	config.Consumer.Offsets.AutoCommit.Enable = true
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	config.Version, err = sarama.ParseKafkaVersion(dc.Version)
+	if err != nil {
+		fmt.Printf("Kafka version(%s) parse failed, err %s \n", dc.Version, err.Error())
+		return
+	}
+
+	config.ClientID = dc.ClientID
+	config.Metadata.Timeout = time.Duration(dc.MetadataMaxAgeMS) * time.Millisecond
+
+	config.Consumer.Retry.Backoff = time.Duration(dc.RetryBackOffMS) * time.Millisecond
+	config.Consumer.Group.Session.Timeout = time.Duration(dc.SessionTimeoutMS) * time.Millisecond
+	config.Consumer.MaxWaitTime = time.Duration(dc.FetchMaxWaitMS) * time.Millisecond
+	config.Consumer.Fetch.Max = dc.FetchMaxBytes
+	config.Consumer.Fetch.Min = dc.FetchMinBytes
+
+	if dc.FromBeginning {
+		fmt.Printf("Kafka Consumer OffsetOldest \n")
+		config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	} else {
+		fmt.Printf("Kafka Consumer OffsetNewest \n")
+		config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	}
+	config.Consumer.Offsets.AutoCommit.Enable = dc.AutoCommit
+	config.Consumer.Offsets.CommitInterval = time.Duration(dc.AutoCommitIntervalMS) * time.Millisecond
+
+	config.Net.DialTimeout = time.Duration(dc.NetConfig.TimeoutMS) * time.Millisecond
+	config.Net.KeepAlive = time.Duration(dc.NetConfig.KeepAliveMS) * time.Millisecond
+
+	if dc.SaslConfig != nil {
+		config.Net.SASL.User = dc.SaslConfig.SaslUser
+		config.Net.SASL.Password = dc.SaslConfig.SaslPassword
+		config.Net.SASL.Mechanism = sarama.SASLMechanism(dc.SaslConfig.SaslMechanism)
+	}
 
 	// Init consumer, consume errors & messages
 	consumer, err := cluster.NewConsumer(m.Config.Host, m.Config.Group, m.Config.Topics, config)
@@ -78,7 +111,7 @@ func (m *MsgQueue) Consumer() {
 
 			if more {
 				if m.Config.IsDebug {
-					fmt.Printf("%s/%d/%d\t%s\n", msg.Topic, string(msg.Value), msg.Partition, msg.Offset)
+					fmt.Printf("%s/%d/%d/%s \n", msg.Topic, msg.Partition, msg.Offset, string(msg.Value))
 				}
 				consumer.MarkOffset(msg, "")
 			}
@@ -159,7 +192,7 @@ func (m *MsgQueue) SyncProducer(message []byte, topic string) error {
 		return err
 	} else {
 		if m.Config.IsDebug {
-			fmt.Printf("Send succeed(%s/%s/%s/%s) \n", topic, message, part, offset)
+			fmt.Printf("Send succeed(%d/%d/%s/%s) \n", part, offset, topic, message)
 		}
 	}
 	return nil
