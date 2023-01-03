@@ -10,8 +10,9 @@ import (
 var m *MsgQueue
 
 type MsgQueue struct {
-	Service ConsumerI
-	Config  *Config
+	AsyncProducer sarama.AsyncProducer
+	Service       ConsumerI
+	Config        *Config
 }
 
 func init() {
@@ -24,12 +25,16 @@ func (m *MsgQueue) New() *MsgQueue {
 	return v
 }
 
-func AddConfig(topic, host []string, group string) { m.AddConfig(topic, host, group) }
-func (m *MsgQueue) AddConfig(topic, host []string, group string) {
+func AddConfig(topic string, topics, host []string, group string, debug bool) {
+	m.AddConfig(topic, topics, host, group, debug)
+}
+func (m *MsgQueue) AddConfig(topic string, topics, host []string, group string, debug bool) {
 	c := &Config{
-		Topic: topic,
-		Host:  host,
-		Group: group,
+		Topic:   topic,
+		Topics:  topics,
+		Host:    host,
+		Group:   group,
+		IsDebug: debug,
 	}
 	m.Config = c
 }
@@ -51,11 +56,11 @@ func (m *MsgQueue) Consumer() {
 	config := cluster.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Group.Return.Notifications = true
-	config.Consumer.Offsets.AutoCommit.Enable = m.Config.AutoCommit
+	config.Consumer.Offsets.AutoCommit.Enable = true
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	// Init consumer, consume errors & messages
-	consumer, err := cluster.NewConsumer(m.Config.Host, m.Config.Group, m.Config.Topic, config)
+	consumer, err := cluster.NewConsumer(m.Config.Host, m.Config.Group, m.Config.Topics, config)
 	if err != nil {
 		fmt.Printf("Failed to start consumer: %s", err)
 		return
@@ -72,7 +77,7 @@ func (m *MsgQueue) Consumer() {
 			m.Service.Consume(mqMsg)
 
 			if more {
-				//fmt.Printf("%s/%d/%d\t%s\n", msg.Topic, msg.Partition, msg.Offset, msg.Value)
+				//fmt.Printf("%s/%d/%d\t%s\n", msg.Topics, msg.Partition, msg.Offset, msg.Value)
 				consumer.MarkOffset(msg, "")
 			}
 		case ntf, more := <-consumer.Notifications():
@@ -88,25 +93,33 @@ func (m *MsgQueue) Consumer() {
 	}
 }
 
-func (m *MsgQueue) Producer(topic, msg string) error {
+func (m *MsgQueue) AddProducer() sarama.AsyncProducer {
+	if m.AsyncProducer != nil {
+		return m.AsyncProducer
+	}
 	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Return.Successes = true
-	config.Producer.Partitioner = sarama.NewRandomPartitioner
+	config.Producer.Timeout = 5 * time.Second
+	p, err := sarama.NewAsyncProducer(m.Config.Host, config)
+	if err != nil {
+		fmt.Printf("sarama.NewSyncProducer fails, err %s \n", err.Error())
+		return nil
+	}
+	return p
 
-	pMsg := &sarama.ProducerMessage{
+}
+
+func (m *MsgQueue) Producer(message, topic string) {
+	msg := &sarama.ProducerMessage{
 		Topic: topic,
-		Value: sarama.StringEncoder(msg),
+		Value: sarama.ByteEncoder(message),
 	}
-	producer, err := sarama.NewSyncProducer(m.Config.Host, config)
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-		return err
+	m.AsyncProducer.Input() <- msg
+	if m.AsyncProducer.Errors() != nil {
+		fmt.Printf("Send fails (%s), err %s \n", message, m.AsyncProducer.Errors())
+	} else {
+		if m.Config.IsDebug {
+			fmt.Printf("Send succeed(%s) \n", message)
+		}
 	}
-	defer producer.Close()
-	_, _, err = producer.SendMessage(pMsg)
-	if err != nil {
-		return err
-	}
-	return nil
 }
