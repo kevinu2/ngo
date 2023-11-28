@@ -1,6 +1,9 @@
 package GormDB
 
-import "github.com/kevinu2/ngo2/pkgs/Default"
+import (
+	"github.com/kevinu2/ngo2/pkgs/Default"
+	"gorm.io/gorm/logger"
+)
 
 type DbType uint8
 
@@ -21,5 +24,20 @@ func (dt DbType) GetType() string {
 
 	default:
 		return Default.DefaultEmpty
+	}
+}
+
+func LogLevel(level string) logger.LogLevel {
+	switch level {
+	case "Silent":
+		return logger.Silent
+	case "Error":
+		return logger.Error
+	case "Warn":
+		return logger.Warn
+	case "Info":
+		return logger.Info
+	default:
+		return logger.Silent
 	}
 }

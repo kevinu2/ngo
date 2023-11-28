@@ -11,4 +11,5 @@ type GormConfig struct {
 	DbMaxIdle     int
 	DbMaxOpen     int
 	DbMaxLifeTime int
+	LogLevel      string
 }

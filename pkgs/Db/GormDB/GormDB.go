@@ -7,6 +7,9 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"log"
+	"os"
 	"time"
 )
 
@@ -47,6 +50,15 @@ func (g *Gorm) initDB() {
 	if err != nil {
 		g.Config.DbTimeZone = "UTC"
 	}
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			Colorful:                  false,
+			IgnoreRecordNotFoundError: true,                        // Ignore ErrRecordNotFound error for logger
+			LogLevel:                  LogLevel(g.Config.LogLevel), // Log level
+		},
+	)
 	switch g.Config.DbType {
 	case DbPostgres.GetType():
 		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s  sslmode=disable TimeZone=%s dbname=%s", g.Config.DbHost, g.Config.DbPort, g.Config.DbUser, g.Config.DbPass, g.Config.DbTimeZone, g.Config.DbName)
@@ -54,7 +66,11 @@ func (g *Gorm) initDB() {
 			postgres.New(postgres.Config{
 				DSN:                  dsn,
 				PreferSimpleProtocol: true,
-			}))
+			}),
+			&gorm.Config{
+				Logger: newLogger,
+			},
+		)
 		if err != nil {
 			panic("Failed to connect to DB: " + err.Error())
 		}
@@ -70,7 +86,9 @@ func (g *Gorm) initDB() {
 				DontSupportRenameColumn:   true,
 				SkipInitializeWithVersion: false,
 			}),
-			&gorm.Config{},
+			&gorm.Config{
+				Logger: newLogger,
+			},
 		)
 		if err != nil {
 			panic("Failed to connect to DB: " + err.Error())
@@ -79,7 +97,9 @@ func (g *Gorm) initDB() {
 		dsn := fmt.Sprintf("tcp://%s:%d?database=%s&username=%s&password=%s&read_timeout=10&write_timeout=20", g.Config.DbHost, g.Config.DbPort, g.Config.DbName, g.Config.DbUser, g.Config.DbPass)
 		db, err = gorm.Open(
 			clickhouse.Open(dsn),
-			&gorm.Config{},
+			&gorm.Config{
+				Logger: newLogger,
+			},
 		)
 	default:
 		panic(errors.New("Unsupported DB Type: " + g.Config.DbType))
