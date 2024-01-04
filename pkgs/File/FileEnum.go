@@ -16,6 +16,7 @@ const (
 	ModeGroupDir
 	ModeOtherFile
 	ModeOtherDir
+	ModeWriteOnly
 	ModeFull
 )
 
@@ -37,6 +38,8 @@ func (fm FileMode) Code() uint32 {
 		return 0666
 	case ModeOtherDir:
 		return 0777
+	case ModeWriteOnly:
+		return 0200
 	case ModeFull:
 		return 0777
 	default:
