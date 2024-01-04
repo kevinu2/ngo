@@ -1,7 +1,7 @@
 package Default
 
 const (
-	DefaultAccuracy = 4
+	Accuracy = 4
 )
 
 const (
@@ -10,9 +10,14 @@ const (
 
 // 常量
 const (
-	DefaultZero      = string("0")
-	DefaultZeroFloat = string("0.0000")
-	DefaultEmpty     = string("")
+	DefaultEmpty    = string("")
+	StringZero      = string("0")
+	StringZeroFloat = string("0.0000")
+	StringEmpty     = string("")
+)
+
+var (
+	ByteEmpty = []byte(StringEmpty)
 )
 
 //code
@@ -22,9 +27,9 @@ const (
 )
 
 const (
-	DefaultEnabled  = 1
-	DefaultDisabled = 0
+	Enabled  = 1
+	Disabled = 0
 
-	DefaultTrue  = 1
-	DefaultFalse = 0
+	True  = 1
+	False = 0
 )
