@@ -11,7 +11,7 @@ func DecToBin(d1Str string) (decStr string) {
 	bin := decimal.NewFromInt(2)
 	d1, _ := decimal.NewFromString(d1Str)
 	if d1 == decimal.Zero {
-		return Default.DefaultZero
+		return Default.StringZero
 	}
 	for ; d1.GreaterThan(decimal.Zero); d1 = d1.Div(bin).Truncate(0) {
 		lsb := d1.Mod(bin)
