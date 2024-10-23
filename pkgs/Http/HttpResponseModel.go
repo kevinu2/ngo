@@ -1,12 +1,11 @@
 package Http
 
-type Response struct {
-	Err    Error       `json:"err"`
+type ErrorResponse struct {
+	Err    Error       `json:"error"`
 	Result interface{} `json:"result"`
 }
 
 type RightResponse struct {
-	Err    Error       `json:"error"`
 	Result interface{} `json:"result"`
 }
 

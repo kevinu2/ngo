@@ -21,7 +21,7 @@ func LoginFilter() gin.HandlerFunc {
 		if err != nil {
 			//c.AbortWithError(200,err)
 			Log.Logger().Errorf("err:%v", err.Error())
-			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: err.Error()}})
+			c.JSON(http.StatusOK, ErrorResponse{Err: Error{Code: CodeUnLogin, Msg: err.Error()}})
 			c.Abort()
 			return
 		}
@@ -30,7 +30,7 @@ func LoginFilter() gin.HandlerFunc {
 		if sessionId == "" {
 			Log.Logger().Error("sessionId 为空")
 			//c.AbortWithError(200, errors.New("获取token为空"))
-			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: "获取session_id为空"}})
+			c.JSON(http.StatusOK, ErrorResponse{Err: Error{Code: CodeUnLogin, Msg: "获取session_id为空"}})
 			c.Abort()
 			return
 		}
@@ -40,7 +40,7 @@ func LoginFilter() gin.HandlerFunc {
 		if err != nil {
 			Log.Logger().Errorf("get redis err:%v", err.Error())
 			//c.AbortWithError(200, errors.New("获取token失败"))
-			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: "redis获取session_id为空"}})
+			c.JSON(http.StatusOK, ErrorResponse{Err: Error{Code: CodeUnLogin, Msg: "redis获取session_id为空"}})
 			c.Abort()
 			return
 		}
@@ -48,7 +48,7 @@ func LoginFilter() gin.HandlerFunc {
 		var user UserInfo
 		err = json.Unmarshal([]byte(r), &user)
 		if err != nil {
-			c.JSON(http.StatusOK, Response{Err: Error{Code: CodeUnLogin, Msg: "反序列化user失败"}})
+			c.JSON(http.StatusOK, ErrorResponse{Err: Error{Code: CodeUnLogin, Msg: "反序列化user失败"}})
 			c.Abort()
 			Log.Logger().Errorf("Marshal error:%v", err.Error())
 			return
