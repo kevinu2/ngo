@@ -1,4 +1,4 @@
-package SqlX
+package SqlXDB
 
 import "github.com/kevinu2/ngo2/pkgs/Default"
 

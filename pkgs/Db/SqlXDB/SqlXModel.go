@@ -1,4 +1,4 @@
-package SqlX
+package SqlXDB
 
 type Config struct {
 	User        string

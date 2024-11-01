@@ -1,4 +1,4 @@
-package SqlX
+package SqlXDB
 
 import (
 	"fmt"
@@ -6,22 +6,22 @@ import (
 	"time"
 )
 
-var sqlX *SqlX
+var sqlX *DB
 
-type SqlX struct {
-	SqlXDb *sqlx.DB
+type DB struct {
+	Engine *sqlx.DB
 	Config Config
 }
 
-func GetSqlX() *SqlX { return sqlX.GetSqlX() }
-func (s *SqlX) GetSqlX() *SqlX {
+func GetSqlX() *DB { return sqlX.GetSqlX() }
+func (s *DB) GetSqlX() *DB {
 	if sqlX == nil {
 		s.initSqlX()
 	}
 	return sqlX
 }
 
-func (s *SqlX) initSqlX() {
+func (s *DB) initSqlX() {
 	var (
 		db  *sqlx.DB
 		err error
@@ -34,20 +34,21 @@ func (s *SqlX) initSqlX() {
 	case DbMySQL.GetType(), DbMariaDB.GetType(), DbPercona.GetType(), DbDoris.GetType():
 		db, err = sqlx.Open("mysql", url)
 		if err != nil {
-			panic("DB open failed: " + err.Error())
+			panic(fmt.Sprintf("DB open %v failed: %s", s.Config, err.Error()))
 		}
 	case DbPostgres.GetType():
 		db, err = sqlx.Open("postgres", url)
 		if err != nil {
-			panic("DB open failed: " + err.Error())
+			panic(fmt.Sprintf("DB open %v failed: %s", s.Config, err.Error()))
 		}
 	default:
 		panic("Unsupported DB Type: " + s.Config.Type)
 	}
+
 	db.SetMaxIdleConns(s.Config.MaxIdle)
 	db.SetMaxOpenConns(s.Config.MaxOpen)
 	db.SetConnMaxLifetime(time.Duration(s.Config.MaxLifeTime) * time.Second)
 	db.SetConnMaxIdleTime(time.Duration(s.Config.MaxIdle) * time.Second)
 
-	s.SqlXDb = db
+	s.Engine = db
 }
