@@ -3,37 +3,51 @@ package SqlX
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"github.com/spf13/viper"
+	"time"
 )
 
-var SqlX *sqlx.DB
+var sqlX *SqlX
 
-func GetSqlX() *sqlx.DB {
-	if SqlX == nil {
-		initSqlX()
-	}
-	return SqlX
+type SqlX struct {
+	SqlXDb *sqlx.DB
+	Config Config
 }
 
-func initSqlX() {
-	username := viper.GetString("datasource.username")
-	password := viper.GetString("datasource.password")
-	database := viper.GetString("datasource.database")
-	host := viper.GetString("datasource.host")
-	port := viper.GetString("datasource.port")
-	parameters := viper.GetString("datasource.parameters")
-	maxIdle := viper.GetInt("datasource.max-idle")
-	maxOpen := viper.GetInt("datasource.max-open")
-
-	url := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", username, password, host, port, database, parameters)
-
-	db, err := sqlx.Open("mysql", url)
-	if err != nil {
-		panic("连接数据库失败:" + err.Error())
+func GetSqlX() *SqlX { return sqlX.GetSqlX() }
+func (s *SqlX) GetSqlX() *SqlX {
+	if sqlX == nil {
+		s.initSqlX()
 	}
+	return sqlX
+}
 
-	db.SetMaxIdleConns(maxIdle)
-	db.SetMaxOpenConns(maxOpen)
+func (s *SqlX) initSqlX() {
+	var (
+		db  *sqlx.DB
+		err error
+	)
 
-	SqlX = db
+	url := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%t&loc=%s&maxAllowedPacket=%d",
+		s.Config.User, s.Config.Pass, s.Config.Host, s.Config.Port, s.Config.Name, s.Config.Charset, s.Config.ParseTime, s.Config.TimeZone, s.Config.MaxSize)
+
+	switch s.Config.Type {
+	case DbMySQL.GetType(), DbMariaDB.GetType(), DbPercona.GetType(), DbDoris.GetType():
+		db, err = sqlx.Open("mysql", url)
+		if err != nil {
+			panic("DB open failed: " + err.Error())
+		}
+	case DbPostgres.GetType():
+		db, err = sqlx.Open("postgres", url)
+		if err != nil {
+			panic("DB open failed: " + err.Error())
+		}
+	default:
+		panic("Unsupported DB Type: " + s.Config.Type)
+	}
+	db.SetMaxIdleConns(s.Config.MaxIdle)
+	db.SetMaxOpenConns(s.Config.MaxOpen)
+	db.SetConnMaxLifetime(time.Duration(s.Config.MaxLifeTime) * time.Second)
+	db.SetConnMaxIdleTime(time.Duration(s.Config.MaxIdle) * time.Second)
+
+	s.SqlXDb = db
 }
