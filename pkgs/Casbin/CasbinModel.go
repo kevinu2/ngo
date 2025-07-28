@@ -1,6 +1,6 @@
 package Casbin
 
-type CasbinAuthInfo struct {
+type AuthInfo struct {
 	Id          string `form:"id" json:"id"`
 	PType       string `form:"ptype" json:"ptype"`
 	PPType      string `form:"p_type" json:"p_type"`
@@ -9,7 +9,7 @@ type CasbinAuthInfo struct {
 	Method      string `form:"method" json:"method"`
 }
 
-type CasbinModel struct {
+type Model struct {
 	Id          uint   `json:"id" gorm:"column:id"`
 	PType       string `json:"ptype" gorm:"column:ptype"`
 	PPType      string `json:"p_type"  gorm:"column:p_type"`
@@ -18,12 +18,12 @@ type CasbinModel struct {
 	Method      string `json:"method" gorm:"column:v2"`
 }
 
-type CasbinInfo struct {
+type Info struct {
 	Url    string `json:"url"`
 	Method string `json:"method"`
 }
 
-type CasbinRangeInfo struct {
+type RangeInfo struct {
 	//Tbg        string `form:"tbg" json:"tbg"`
 	//Ted        string `form:"ted" json:"ted"`
 	//OrderField string `form:"order_field" json:"order_field"`
@@ -32,14 +32,13 @@ type CasbinRangeInfo struct {
 	Limit  int `form:"limit" json:"limit"`
 }
 
-// CasbinInReceive structure for input parameters
-type CasbinInReceive struct {
-	AuthorityId string       `form:"auth_id" json:"auth_id" binding:"required"`
-	CasbinInfos []CasbinInfo `form:"casbin_infos" json:"casbin_infos"`
+type InReceive struct {
+	AuthorityId string `form:"auth_id" json:"auth_id" binding:"required"`
+	Infos       []Info `form:"cabin_infos" json:"cabin_infos"`
 }
 
-type CasbinPolicyPathResponse struct {
-	CasbinInfo []CasbinInfo `json:"casbin_info"`
+type PolicyPathResponse struct {
+	Info []Info `json:"casbin_info"`
 }
 
 type CheckAuthParam struct {

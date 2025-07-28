@@ -2,7 +2,6 @@ package Http
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kevinu2/ngo2/pkgs/Http"
 	"net/http"
 )
 
@@ -17,7 +16,7 @@ func (Response) Right(c *gin.Context, data interface{}) {
 func (Response) Error(c *gin.Context, err error) {
 	c.JSON(http.StatusOK, ErrorResponse{
 		Err: Error{
-			Code:   Http.ParamsError3000,
+			Code:   ParamsError3000.Code(),
 			Msg:    err.Error(),
 			Result: nil,
 		},

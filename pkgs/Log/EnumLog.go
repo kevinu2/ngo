@@ -1,20 +1,20 @@
 package Log
 
-type LogType uint8
+type Type uint8
 
 const (
-	LogOutputStd LogType = iota + 1
-	LogOutputFile
-	LogOutputBoth
+	OutputStd Type = iota + 1
+	OutputFile
+	OutputBoth
 )
 
-func (lt LogType) Type() string {
+func (lt Type) Type() string {
 	switch lt {
-	case LogOutputStd:
+	case OutputStd:
 		return "std"
-	case LogOutputFile:
+	case OutputFile:
 		return "file"
-	case LogOutputBoth:
+	case OutputBoth:
 		return "both"
 	default:
 		return "std"
@@ -22,33 +22,33 @@ func (lt LogType) Type() string {
 	}
 }
 
-type LogLevel uint8
+type Level uint8
 
 const (
-	LogDebug LogLevel = iota + 1
-	LogInfo
-	LogWarn
-	LogError
-	LogDPanic
-	LogPanic
-	LogFatal
+	Debug Level = iota + 1
+	Info
+	Warn
+	Error
+	DPanic
+	Panic
+	Fatal
 )
 
-func (ll LogLevel) Level() string {
+func (ll Level) Level() string {
 	switch ll {
-	case LogDebug:
+	case Debug:
 		return "Debug"
-	case LogInfo:
+	case Info:
 		return "Info"
-	case LogWarn:
+	case Warn:
 		return "Warn"
-	case LogError:
+	case Error:
 		return "Error"
-	case LogDPanic:
+	case DPanic:
 		return "DPanic"
-	case LogPanic:
+	case Panic:
 		return "Panic"
-	case LogFatal:
+	case Fatal:
 		return "Fatal"
 	default:
 		return "Info"

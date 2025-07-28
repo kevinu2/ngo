@@ -1,8 +1,8 @@
 package Http
 
 const (
-	SessionId   = "session_id"
-	HttpCode200 = 200
+	SessionId = "session_id"
+	Code200   = 200
 )
 
 var (

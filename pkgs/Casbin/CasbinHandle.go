@@ -2,15 +2,15 @@ package Casbin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kevinu2/ngo2/pkgs/Default"
-	"github.com/kevinu2/ngo2/pkgs/Jwt"
+	"ngo2/pkgs/Default"
+	"ngo2/pkgs/Jwt"
 	"strings"
 )
 
-func CasbinHandler() gin.HandlerFunc {
-	return c.CasbinHandler()
+func Handler() gin.HandlerFunc {
+	return c.Handler()
 }
-func (c *Casbin) CasbinHandler() gin.HandlerFunc {
+func (c *Casbin) Handler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		claims, _ := context.Get(DefaultClaims)
 		waitUse := claims.(*Jwt.Claims)
@@ -28,7 +28,7 @@ func (c *Casbin) CasbinHandler() gin.HandlerFunc {
 		if enforceRs {
 			context.Next()
 		} else {
-			Jwt.ErrorNoPrivileges.GetMsg(context, Default.DefaultEmpty).Abort()
+			Jwt.ErrorNoPrivileges.GetMsg(context, Default.StringEmpty).Abort()
 			return
 		}
 

@@ -4,16 +4,14 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"io"
-	"io/ioutil"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/douyu/jupiter/pkg/util/xcast"
-	"github.com/douyu/jupiter/pkg/util/xmap"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	"github.com/spf13/cast"
 )
 
 // Configuration provides configuration for application.
@@ -48,7 +46,7 @@ func (c *Configuration) SetKeyDelim(delim string) {
 	c.keyDelim = delim
 }
 
-// Sub returns new Configuration instance representing a sub tree of this instance.
+// Sub returns new Configuration instance representing a subtree of this instance.
 func (c *Configuration) Sub(key string) *Configuration {
 	return &Configuration{
 		keyDelim: c.keyDelim,
@@ -68,20 +66,20 @@ func (c *Configuration) OnChange(fn func(*Configuration)) {
 }
 
 // LoadFromDataSource ...
-func (c *Configuration) LoadFromDataSource(ds DataSource, unmarshaller Unmarshaller) error {
+func (c *Configuration) LoadFromDataSource(ds DataSource, unmarshall Unmarshall) error {
 	content, err := ds.ReadConfig()
 	if err != nil {
 		return err
 	}
 
-	if err := c.Load(content, unmarshaller); err != nil {
+	if err := c.Load(content, unmarshall); err != nil {
 		return err
 	}
 
 	go func() {
 		for range ds.IsConfigChanged() {
 			if content, err := ds.ReadConfig(); err == nil {
-				_ = c.Load(content, unmarshaller)
+				_ = c.Load(content, unmarshall)
 				for _, change := range c.onChanges {
 					change(c)
 				}
@@ -93,7 +91,7 @@ func (c *Configuration) LoadFromDataSource(ds DataSource, unmarshaller Unmarshal
 }
 
 // Load ...
-func (c *Configuration) Load(content []byte, unmarshal Unmarshaller) error {
+func (c *Configuration) Load(content []byte, unmarshal Unmarshall) error {
 	configuration := make(map[string]interface{})
 	if err := unmarshal(content, &configuration); err != nil {
 		return err
@@ -101,13 +99,12 @@ func (c *Configuration) Load(content []byte, unmarshal Unmarshaller) error {
 	return c.apply(configuration)
 }
 
-// Load loads configuration from provided data source.
-func (c *Configuration) LoadFromReader(reader io.Reader, unmarshaller Unmarshaller) error {
-	content, err := ioutil.ReadAll(reader)
+func (c *Configuration) LoadFromReader(reader io.Reader, unmarshall Unmarshall) error {
+	content, err := io.ReadAll(reader)
 	if err != nil {
 		return err
 	}
-	return c.Load(content, unmarshaller)
+	return c.Load(content, unmarshall)
 }
 
 func (c *Configuration) apply(conf map[string]interface{}) error {
@@ -116,7 +113,7 @@ func (c *Configuration) apply(conf map[string]interface{}) error {
 
 	var changes = make(map[string]interface{})
 
-	xmap.MergeStringMap(c.override, conf)
+	mergeStringMap(c.override, conf)
 	for k, v := range c.traverse(c.keyDelim) {
 		orig, ok := c.keyMap.Load(k)
 		if ok && !reflect.DeepEqual(orig, v) {
@@ -152,7 +149,6 @@ func (c *Configuration) notifyChanges(changes map[string]interface{}) {
 	}
 }
 
-// Set ...
 func (c *Configuration) Set(key string, val interface{}) error {
 	paths := strings.Split(key, c.keyDelim)
 	lastKey := paths[len(paths)-1]
@@ -193,7 +189,7 @@ func GetString(key string) string {
 
 // GetString returns the value associated with the key as a string.
 func (c *Configuration) GetString(key string) string {
-	return xcast.ToString(c.Get(key))
+	return cast.ToString(c.Get(key))
 }
 
 // GetBool returns the value associated with the key as a boolean with default defaultConfiguration.
@@ -203,7 +199,7 @@ func GetBool(key string) bool {
 
 // GetBool returns the value associated with the key as a boolean.
 func (c *Configuration) GetBool(key string) bool {
-	return xcast.ToBool(c.Get(key))
+	return cast.ToBool(c.Get(key))
 }
 
 // GetInt returns the value associated with the key as an integer with default defaultConfiguration.
@@ -213,7 +209,7 @@ func GetInt(key string) int {
 
 // GetInt returns the value associated with the key as an integer.
 func (c *Configuration) GetInt(key string) int {
-	return xcast.ToInt(c.Get(key))
+	return cast.ToInt(c.Get(key))
 }
 
 // GetInt64 returns the value associated with the key as an integer with default defaultConfiguration.
@@ -223,7 +219,7 @@ func GetInt64(key string) int64 {
 
 // GetInt64 returns the value associated with the key as an integer.
 func (c *Configuration) GetInt64(key string) int64 {
-	return xcast.ToInt64(c.Get(key))
+	return cast.ToInt64(c.Get(key))
 }
 
 // GetFloat64 returns the value associated with the key as a float64 with default defaultConfiguration.
@@ -233,7 +229,7 @@ func GetFloat64(key string) float64 {
 
 // GetFloat64 returns the value associated with the key as a float64.
 func (c *Configuration) GetFloat64(key string) float64 {
-	return xcast.ToFloat64(c.Get(key))
+	return cast.ToFloat64(c.Get(key))
 }
 
 // GetTime returns the value associated with the key as time with default defaultConfiguration.
@@ -243,7 +239,7 @@ func GetTime(key string) time.Time {
 
 // GetTime returns the value associated with the key as time.
 func (c *Configuration) GetTime(key string) time.Time {
-	return xcast.ToTime(c.Get(key))
+	return cast.ToTime(c.Get(key))
 }
 
 // GetDuration returns the value associated with the key as a duration with default defaultConfiguration.
@@ -253,7 +249,7 @@ func GetDuration(key string) time.Duration {
 
 // GetDuration returns the value associated with the key as a duration.
 func (c *Configuration) GetDuration(key string) time.Duration {
-	return xcast.ToDuration(c.Get(key))
+	return cast.ToDuration(c.Get(key))
 }
 
 // GetStringSlice returns the value associated with the key as a slice of strings with default defaultConfiguration.
@@ -263,7 +259,7 @@ func GetStringSlice(key string) []string {
 
 // GetStringSlice returns the value associated with the key as a slice of strings.
 func (c *Configuration) GetStringSlice(key string) []string {
-	return xcast.ToStringSlice(c.Get(key))
+	return cast.ToStringSlice(c.Get(key))
 }
 
 // GetSlice returns the value associated with the key as a slice of strings with default defaultConfiguration.
@@ -273,7 +269,7 @@ func GetSlice(key string) []interface{} {
 
 // GetSlice returns the value associated with the key as a slice of strings.
 func (c *Configuration) GetSlice(key string) []interface{} {
-	return xcast.ToSlice(c.Get(key))
+	return cast.ToSlice(c.Get(key))
 }
 
 // GetStringMap returns the value associated with the key as a map of interfaces with default defaultConfiguration.
@@ -283,7 +279,7 @@ func GetStringMap(key string) map[string]interface{} {
 
 // GetStringMap returns the value associated with the key as a map of interfaces.
 func (c *Configuration) GetStringMap(key string) map[string]interface{} {
-	return xcast.ToStringMap(c.Get(key))
+	return cast.ToStringMap(c.Get(key))
 }
 
 // GetStringMapString returns the value associated with the key as a map of strings with default defaultConfiguration.
@@ -293,12 +289,12 @@ func GetStringMapString(key string) map[string]string {
 
 // GetStringMapString returns the value associated with the key as a map of strings.
 func (c *Configuration) GetStringMapString(key string) map[string]string {
-	return xcast.ToStringMapString(c.Get(key))
+	return cast.ToStringMapString(c.Get(key))
 }
 
 // GetSliceStringMap returns the value associated with the slice of maps.
 func (c *Configuration) GetSliceStringMap(key string) []map[string]interface{} {
-	return xcast.ToSliceStringMap(c.Get(key))
+	return toSliceStringMap(c.Get(key))
 }
 
 // GetStringMapStringSlice returns the value associated with the key as a map to a slice of strings with default defaultConfiguration.
@@ -308,7 +304,7 @@ func GetStringMapStringSlice(key string) map[string][]string {
 
 // GetStringMapStringSlice returns the value associated with the key as a map to a slice of strings.
 func (c *Configuration) GetStringMapStringSlice(key string) map[string][]string {
-	return xcast.ToStringMapStringSlice(c.Get(key))
+	return cast.ToStringMapStringSlice(c.Get(key))
 }
 
 // UnmarshalWithExpect unmarshal key, returns expect if failed
@@ -372,7 +368,7 @@ func (c *Configuration) find(key string) interface{} {
 	paths := strings.Split(key, c.keyDelim)
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	m := xmap.DeepSearchInMap(c.override, paths[:len(paths)-1]...)
+	m := deepSearchInMap(c.override, paths[:len(paths)-1]...)
 	dd = m[paths[len(paths)-1]]
 	c.keyMap.Store(key, dd)
 	return dd
@@ -384,7 +380,7 @@ func lookup(prefix string, target map[string]interface{}, data map[string]interf
 		if prefix == "" {
 			pp = k
 		}
-		if dd, err := xcast.ToStringMapE(v); err == nil {
+		if dd, err := cast.ToStringMapE(v); err == nil {
 			lookup(pp, dd, data, sep)
 		} else {
 			data[pp] = v
@@ -405,8 +401,7 @@ type DataSource interface {
 	io.Closer
 }
 
-// Unmarshaller ...
-type Unmarshaller = func([]byte, interface{}) error
+type Unmarshall = func([]byte, interface{}) error
 
 var defaultConfiguration = New()
 
@@ -416,15 +411,12 @@ func OnChange(fn func(*Configuration)) {
 }
 
 // LoadFromDataSource load configuration from data source
-// if data source supports dynamic config, a monitor goroutinue
-// would be
-func LoadFromDataSource(ds DataSource, unmarshaller Unmarshaller) error {
-	return defaultConfiguration.LoadFromDataSource(ds, unmarshaller)
+func LoadFromDataSource(ds DataSource, unmarshall Unmarshall) error {
+	return defaultConfiguration.LoadFromDataSource(ds, unmarshall)
 }
 
-// Load loads configuration from provided provider with default defaultConfiguration.
-func LoadFromReader(r io.Reader, unmarshaller Unmarshaller) error {
-	return defaultConfiguration.LoadFromReader(r, unmarshaller)
+func LoadFromReader(r io.Reader, unmarshall Unmarshall) error {
+	return defaultConfiguration.LoadFromReader(r, unmarshall)
 }
 
 // Apply ...
@@ -452,9 +444,9 @@ func Get(key string) interface{} {
 	return defaultConfiguration.Get(key)
 }
 
-// Set set config value for key
+// Set config value for key
 func Set(key string, val interface{}) {
-	defaultConfiguration.Set(key, val)
+	_ = defaultConfiguration.Set(key, val)
 }
 
 type (
@@ -468,9 +460,84 @@ var defaultGetOptions = GetOptions{
 	TagName: "mapstructure",
 }
 
-// 设置Tag
 func TagName(tag string) GetOption {
 	return func(o *GetOptions) {
 		o.TagName = tag
 	}
+}
+
+func toSliceStringMap(i interface{}) []map[string]interface{} {
+	s := cast.ToSlice(i)
+	result := make([]map[string]interface{}, 0, len(s))
+	for _, v := range s {
+		m := cast.ToStringMap(v)
+		result = append(result, m)
+	}
+	return result
+}
+
+func mergeStringMap(dest, src map[string]interface{}) {
+	for sk, sv := range src {
+		tv, ok := dest[sk]
+		if !ok {
+			// val不存在时，直接赋值
+			dest[sk] = sv
+			continue
+		}
+
+		svType := reflect.TypeOf(sv)
+		tvType := reflect.TypeOf(tv)
+		if svType != tvType {
+			fmt.Println("continue, type is different")
+			continue
+		}
+
+		switch ttv := tv.(type) {
+		case map[interface{}]interface{}:
+			tsv := sv.(map[interface{}]interface{})
+			ssv := toMapStringInterface(tsv)
+			stv := toMapStringInterface(ttv)
+			mergeStringMap(stv, ssv)
+			dest[sk] = stv
+		case map[string]interface{}:
+			mergeStringMap(ttv, sv.(map[string]interface{}))
+			dest[sk] = ttv
+		default:
+			dest[sk] = sv
+		}
+	}
+}
+
+func deepSearchInMap(m map[string]interface{}, paths ...string) map[string]interface{} {
+	//深度拷贝
+	temp := make(map[string]interface{})
+	for k, v := range m {
+		temp[k] = v
+	}
+	for _, k := range paths {
+		m2, ok := temp[k]
+		if !ok {
+			m3 := make(map[string]interface{})
+			temp[k] = m3
+			temp = m3
+			continue
+		}
+
+		m3, err := cast.ToStringMapE(m2)
+		if err != nil {
+			m3 = make(map[string]interface{})
+			temp[k] = m3
+		}
+		// continue search
+		temp = m3
+	}
+	return temp
+}
+
+func toMapStringInterface(src map[interface{}]interface{}) map[string]interface{} {
+	tgt := map[string]interface{}{}
+	for k, v := range src {
+		tgt[fmt.Sprintf("%v", k)] = v
+	}
+	return tgt
 }

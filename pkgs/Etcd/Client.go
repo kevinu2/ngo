@@ -5,30 +5,28 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"github.com/kevinu2/ngo2/pkgs/Log"
-	"io/ioutil"
+	"google.golang.org/grpc/credentials/insecure"
+	"os"
 	"strings"
 	"time"
 
-	"go.etcd.io/etcd/client/v3/concurrency"
-
 	grpcProm "github.com/grpc-ecosystem/go-grpc-prometheus"
-	clientV3 "go.etcd.io/etcd/client/v3"
-
-	//"go.etcd.io/etcd/mvcc/mvccpb"
-	"go.etcd.io/etcd/api/mvccpb"
+	"go.etcd.io/etcd/api/v3/mvccpb"
+	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.etcd.io/etcd/client/v3/concurrency"
 	"google.golang.org/grpc"
+	"ngo2/pkgs/Log"
 )
 
 // Client ...
 type Client struct {
-	*clientV3.Client
+	*clientv3.Client
 	config *Config
 }
 
 // NewClient ...
 func NewClient(config *Config) (*Client, error) {
-	conf := clientV3.Config{
+	conf := clientv3.Config{
 		Endpoints:            config.Endpoints,
 		DialTimeout:          config.ConnectTimeout,
 		DialKeepAliveTime:    10 * time.Second,
@@ -46,7 +44,7 @@ func NewClient(config *Config) (*Client, error) {
 	}
 
 	if !config.Secure {
-		conf.DialOptions = append(conf.DialOptions, grpc.WithInsecure())
+		grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
 	if config.BasicAuth {
@@ -60,7 +58,7 @@ func NewClient(config *Config) (*Client, error) {
 	}
 
 	if config.CaCert != "" {
-		certBytes, err := ioutil.ReadFile(config.CaCert)
+		certBytes, err := os.ReadFile(config.CaCert)
 		if err != nil {
 			Log.Logger().Panic("parse CaCert failed, err: " + err.Error())
 		}
@@ -87,7 +85,7 @@ func NewClient(config *Config) (*Client, error) {
 		conf.TLS = tlsConfig
 	}
 
-	client, err := clientV3.New(conf)
+	client, err := clientv3.New(conf)
 
 	if err != nil {
 		// Log.Logger().Panic("client etcd start panic, err: " + err.Error())
@@ -103,7 +101,7 @@ func NewClient(config *Config) (*Client, error) {
 	return cc, nil
 }
 
-// GetKeyValue queries etcd key, returns mvccpb.KeyValue
+// GetKeyValue queries etcd key, returns *clientv3.KeyValue
 func (client *Client) GetKeyValue(ctx context.Context, key string) (kv *mvccpb.KeyValue, err error) {
 	rp, err := client.Client.Get(ctx, key)
 	if err != nil {
@@ -123,7 +121,7 @@ func (client *Client) GetPrefix(ctx context.Context, prefix string) (map[string]
 		vars = make(map[string]string)
 	)
 
-	resp, err := client.Get(ctx, prefix, clientV3.WithPrefix())
+	resp, err := client.Get(ctx, prefix, clientv3.WithPrefix())
 	if err != nil {
 		return vars, err
 	}
@@ -137,7 +135,7 @@ func (client *Client) GetPrefix(ctx context.Context, prefix string) (map[string]
 
 // DelPrefix 按前缀删除
 func (client *Client) DelPrefix(ctx context.Context, prefix string) (deleted int64, err error) {
-	resp, err := client.Delete(ctx, prefix, clientV3.WithPrefix())
+	resp, err := client.Delete(ctx, prefix, clientv3.WithPrefix())
 	if err != nil {
 		return 0, err
 	}
@@ -154,13 +152,13 @@ func (client *Client) GetValues(ctx context.Context, keys ...string) (map[string
 	)
 
 	doTxn := func(ops []string) error {
-		txnOps := make([]clientV3.Op, 0, maxTxnOps)
+		txnOps := make([]clientv3.Op, 0, maxTxnOps)
 
 		for _, k := range ops {
-			txnOps = append(txnOps, clientV3.OpGet(k,
-				clientV3.WithPrefix(),
-				clientV3.WithSort(clientV3.SortByKey, clientV3.SortDescend),
-				clientV3.WithRev(firstRevision)))
+			txnOps = append(txnOps, clientv3.OpGet(k,
+				clientv3.WithPrefix(),
+				clientv3.WithSort(clientv3.SortByKey, clientv3.SortDescend),
+				clientv3.WithRev(firstRevision)))
 		}
 
 		result, err := client.Txn(ctx).Then(txnOps...).Commit()
@@ -187,21 +185,22 @@ func (client *Client) GetValues(ctx context.Context, keys ...string) (map[string
 	}
 	cnt := len(keys) / maxTxnOps
 	for i := 0; i <= cnt; i++ {
-		switch temp := i == cnt; temp {
-		case false:
-			if err := doTxn(keys[i*maxTxnOps : (i+1)*maxTxnOps]); err != nil {
-				return vars, err
-			}
-		case true:
-			if err := doTxn(keys[i*maxTxnOps:]); err != nil {
+		start := i * maxTxnOps
+		end := (i + 1) * maxTxnOps
+		if end > len(keys) {
+			end = len(keys)
+		}
+		if start < end {
+			if err := doTxn(keys[start:end]); err != nil {
 				return vars, err
 			}
 		}
 	}
+
 	return vars, nil
 }
 
-//GetLeaseSession 创建租约会话
+// GetLeaseSession 创建租约会话
 func (client *Client) GetLeaseSession(ctx context.Context, opts ...concurrency.SessionOption) (leaseSession *concurrency.Session, err error) {
 	return concurrency.NewSession(client.Client, opts...)
 }

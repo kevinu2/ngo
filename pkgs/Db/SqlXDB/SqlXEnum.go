@@ -1,6 +1,6 @@
 package SqlXDB
 
-import "github.com/kevinu2/ngo2/pkgs/Default"
+import "ngo2/pkgs/Default"
 
 type DbType uint8
 
@@ -37,6 +37,6 @@ func (dt DbType) GetType() string {
 	case DbSQLite:
 		return "sqlite"
 	default:
-		return Default.DefaultEmpty
+		return Default.StringEmpty
 	}
 }

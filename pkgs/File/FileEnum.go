@@ -5,10 +5,10 @@ const (
 	DefaultDirMode  = uint32(0755)
 )
 
-type FileMode uint8
+type Mode uint8
 
 const (
-	ModeDefaultFile FileMode = iota + 1
+	ModeDefaultFile Mode = iota + 1
 	ModeDefaultDir
 	ModeOwnerFile
 	ModeOwnerDir
@@ -20,7 +20,7 @@ const (
 	ModeFull
 )
 
-func (fm FileMode) Code() uint32 {
+func (fm Mode) Code() uint32 {
 	switch fm {
 	case ModeDefaultFile:
 		return 0644

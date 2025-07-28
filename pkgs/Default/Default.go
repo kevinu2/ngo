@@ -10,7 +10,7 @@ const (
 
 // 常量
 const (
-	DefaultEmpty    = string("")
+	Empty           = string("")
 	StringZero      = string("0")
 	StringZeroFloat = string("0.0000")
 	StringEmpty     = string("")

@@ -3,13 +3,13 @@ package RedisDB
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kevinu2/redisgo"
+	"ngo2/pkgs/RedisGo"
 )
 
 var r *DB
 
 type DB struct {
-	RedisDB *redisgo.Cacher
+	RedisDB *RedisGo.Cacher
 	Config  *RedisConfig
 }
 
@@ -37,8 +37,8 @@ func (r *DB) AddConfig(dbUser, dbPass, dbHost string, dbPort int, dbName, dbMaxI
 	}
 }
 
-func GetDB() *redisgo.Cacher { return r.GetDB() }
-func (r *DB) GetDB() *redisgo.Cacher {
+func GetDB() *RedisGo.Cacher { return r.GetDB() }
+func (r *DB) GetDB() *RedisGo.Cacher {
 	if r.RedisDB == nil {
 		fmt.Print("Redis: initDB()! \n")
 		r.initDB()
@@ -47,8 +47,8 @@ func (r *DB) GetDB() *redisgo.Cacher {
 }
 
 func (r *DB) initDB() {
-	c, err := redisgo.New(
-		redisgo.Options{
+	c, err := RedisGo.New(
+		RedisGo.Options{
 			Network:     "tcp",
 			Addr:        fmt.Sprintf("%s:%d", r.Config.DbHost, r.Config.DbPort),
 			Password:    r.Config.DbPass,
@@ -60,7 +60,7 @@ func (r *DB) initDB() {
 			Unmarshal:   json.Unmarshal,
 		})
 	if err != nil {
-		fmt.Printf("redisgo.New() fails, err: %v", err.Error())
+		fmt.Printf("RedisGo.New() fails, err: %v", err.Error())
 		panic(err)
 	}
 	r.RedisDB = c

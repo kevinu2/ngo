@@ -3,7 +3,7 @@ package Utils
 import (
 	"bytes"
 	"compress/gzip"
-	"io/ioutil"
+	"io"
 )
 
 type zip struct {
@@ -23,5 +23,5 @@ func (zip) UnzipByte(data []byte) (unzipData []byte, err error) {
 	}
 	defer closer.Close()
 
-	return ioutil.ReadAll(closer)
+	return io.ReadAll(closer)
 }

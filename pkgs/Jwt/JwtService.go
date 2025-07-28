@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/kevinu2/redisgo"
+	"github.com/golang-jwt/jwt/v4"
+	"ngo2/pkgs/RedisGo"
 	"strconv"
 	"time"
 )
@@ -17,7 +17,7 @@ type JWT struct {
 	SigningKey []byte
 	Target     string
 	SessionId  string
-	Redis      *redisgo.Cacher
+	Redis      *RedisGo.Cacher
 }
 
 func init() {
@@ -28,11 +28,11 @@ func New() *JWT {
 	return new(JWT)
 }
 
-func AddConfig(signed, platform, SessionId string, redis *redisgo.Cacher) {
+func AddConfig(signed, platform, SessionId string, redis *RedisGo.Cacher) {
 	j.AddConfig(signed, platform, SessionId, redis)
 }
 
-func (j *JWT) AddConfig(signKey, platform, SessionId string, redis *redisgo.Cacher) {
+func (j *JWT) AddConfig(signKey, platform, SessionId string, redis *RedisGo.Cacher) {
 	j.SigningKey = []byte(signKey)
 	j.Target = platform
 	j.SessionId = SessionId
@@ -164,7 +164,7 @@ func (j *JWT) Refresh(tokenString string) (string, error) {
 	}
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		jwt.TimeFunc = time.Now
-		claims.StandardClaims.ExpiresAt = time.Now().Add(1 * time.Hour).Unix()
+		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(1 * time.Hour))
 		return j.Create(*claims)
 	}
 	return "", errors.New(TokenInvalid)

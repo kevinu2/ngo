@@ -1,6 +1,6 @@
 package Collection
 
-type CollectionData struct {
+type Data struct {
 	Score  int64
 	Member string
 }

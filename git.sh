@@ -103,7 +103,7 @@ case ${1} in
 	;;
 	*)
 		echo
-		echo "Useage:"
+		echo "Usage:"
 		echo -e "\t${0} user"
 		echo -e "\t${0} login"
 		echo -e "\t${0} push"

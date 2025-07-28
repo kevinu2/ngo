@@ -1,9 +1,9 @@
 package KafkaMq
 
 import (
+	"context"
 	"fmt"
-	"github.com/Shopify/sarama"
-	cluster "github.com/bsm/sarama-cluster"
+	"github.com/IBM/sarama"
 	"time"
 )
 
@@ -52,77 +52,76 @@ func (m *MsgQueue) ConsumeLoop() {
 	}
 }
 
-func (m *MsgQueue) Consumer() {
-	var err error
-	dc := DefaultConsumerConfig()
-	config := cluster.NewConfig()
-	config.Consumer.Return.Errors = true
-	config.Group.Return.Notifications = true
-	config.Version, err = sarama.ParseKafkaVersion(dc.Version)
-	if err != nil {
-		fmt.Printf("Kafka version(%s) parse failed, err %s \n", dc.Version, err.Error())
-		return
-	}
+// ConsumerGroupHandler implements sarama.ConsumerGroupHandler
+type consumerGroupHandler struct {
+	service ConsumerI
+	config  *Config
+}
 
+func (h *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (h *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (h *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for msg := range claim.Messages() {
+		var mqMsg Msg
+		mqMsg.Topic = msg.Topic
+		mqMsg.Msg = string(msg.Value)
+		h.service.Consume(mqMsg)
+		if h.config.IsDebug {
+			fmt.Printf("%s/%d/%d/%s \n", msg.Topic, msg.Partition, msg.Offset, string(msg.Value))
+		}
+		sess.MarkMessage(msg, "")
+	}
+	return nil
+}
+
+func (m *MsgQueue) Consumer() {
+	dc := DefaultConsumerConfig()
+	config := sarama.NewConfig()
+	config.Version, _ = sarama.ParseKafkaVersion(dc.Version)
 	config.ClientID = dc.ClientID
 	config.Metadata.Timeout = time.Duration(dc.MetadataMaxAgeMS) * time.Millisecond
-
-	config.Consumer.Retry.Backoff = time.Duration(dc.RetryBackOffMS) * time.Millisecond
 	config.Consumer.Group.Session.Timeout = time.Duration(dc.SessionTimeoutMS) * time.Millisecond
 	config.Consumer.MaxWaitTime = time.Duration(dc.FetchMaxWaitMS) * time.Millisecond
 	config.Consumer.Fetch.Max = dc.FetchMaxBytes
 	config.Consumer.Fetch.Min = dc.FetchMinBytes
-
-	if dc.FromBeginning {
-		fmt.Printf("Kafka Consumer OffsetOldest \n")
-		config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	} else {
-		fmt.Printf("Kafka Consumer OffsetNewest \n")
-		config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	}
 	config.Consumer.Offsets.AutoCommit.Enable = dc.AutoCommit
-	config.Consumer.Offsets.CommitInterval = time.Duration(dc.AutoCommitIntervalMS) * time.Millisecond
-
+	config.Consumer.Offsets.AutoCommit.Interval = time.Duration(dc.AutoCommitIntervalMS) * time.Millisecond
 	config.Net.DialTimeout = time.Duration(dc.NetConfig.TimeoutMS) * time.Millisecond
 	config.Net.KeepAlive = time.Duration(dc.NetConfig.KeepAliveMS) * time.Millisecond
 
 	if dc.SaslConfig != nil {
+		config.Net.SASL.Enable = true
 		config.Net.SASL.User = dc.SaslConfig.SaslUser
 		config.Net.SASL.Password = dc.SaslConfig.SaslPassword
 		config.Net.SASL.Mechanism = sarama.SASLMechanism(dc.SaslConfig.SaslMechanism)
 	}
 
-	// Init consumer, consume errors & messages
-	consumer, err := cluster.NewConsumer(m.Config.Host, m.Config.Group, m.Config.Topics, config)
+	if dc.FromBeginning {
+		config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	} else {
+		config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	}
+
+	group, err := sarama.NewConsumerGroup(m.Config.Host, m.Config.Group, config)
 	if err != nil {
-		fmt.Printf("Failed to start consumer: %s", err)
+		fmt.Printf("Failed to start consumer group: %s\n", err)
 		return
 	}
-	defer consumer.Close()
+	defer group.Close()
 
-	// Consume all channels, wait for signal to exit
+	handler := &consumerGroupHandler{
+		service: m.Service,
+		config:  m.Config,
+	}
+
+	ctx := context.Background()
 	for {
-		select {
-		case msg, more := <-consumer.Messages():
-			var mqMsg Msg
-			mqMsg.Topic = msg.Topic
-			mqMsg.Msg = string(msg.Value)
-			m.Service.Consume(mqMsg)
-
-			if more {
-				if m.Config.IsDebug {
-					fmt.Printf("%s/%d/%d/%s \n", msg.Topic, msg.Partition, msg.Offset, string(msg.Value))
-				}
-				consumer.MarkOffset(msg, "")
-			}
-		case ntf, more := <-consumer.Notifications():
-			if more {
-				fmt.Printf("Rebalanced: %+v\n", ntf)
-			}
-		case err, more := <-consumer.Errors():
-			if more {
-				fmt.Printf("Error: %s\n", err.Error())
-			}
+		err := group.Consume(ctx, m.Config.Topics, handler)
+		if err != nil {
+			fmt.Printf("Error from consumer: %s\n", err)
+			break
+		}
+		if ctx.Err() != nil {
 			break
 		}
 	}
@@ -137,11 +136,11 @@ func (m *MsgQueue) AddProducer() sarama.AsyncProducer {
 	config.Producer.Timeout = 5 * time.Second
 	ap, err := sarama.NewAsyncProducer(m.Config.Host, config)
 	if err != nil {
-		fmt.Printf("sarama.NewSyncProducer fails, err %s \n", err.Error())
+		fmt.Printf("sarama.NewAsyncProducer fails, err %s \n", err.Error())
 		panic(err)
 	}
+	m.AsyncProducer = ap
 	return ap
-
 }
 
 func (m *MsgQueue) Producer(message []byte, topic string) error {
@@ -150,12 +149,13 @@ func (m *MsgQueue) Producer(message []byte, topic string) error {
 		Value: sarama.ByteEncoder(message),
 	}
 	m.AsyncProducer.Input() <- msg
-	if <-m.AsyncProducer.Errors() != nil {
+	select {
+	case err := <-m.AsyncProducer.Errors():
 		if m.Config.IsDebug {
+			fmt.Printf("Send fails (%s), err %s \n", message, err)
 		}
-		fmt.Printf("Send fails (%s), err %s \n", message, <-m.AsyncProducer.Errors())
-		return <-m.AsyncProducer.Errors()
-	} else {
+		return err
+	case <-m.AsyncProducer.Successes():
 		if m.Config.IsDebug {
 			fmt.Printf("Send succeed(%s) \n", message)
 		}
@@ -168,7 +168,6 @@ func (m *MsgQueue) CloseProducer() {
 }
 
 func (m *MsgQueue) SyncProducer(message []byte, topic string) error {
-	//指定配置
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.Timeout = 5 * time.Second

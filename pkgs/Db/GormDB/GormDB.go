@@ -104,7 +104,10 @@ func (g *Gorm) initDB() {
 	default:
 		panic(errors.New("Unsupported DB Type: " + g.Config.DbType))
 	}
-	sqlDb, _ := db.DB()
+	sqlDb, err := db.DB()
+	if err != nil {
+		panic("Failed to get DB instance: " + err.Error())
+	}
 	sqlDb.SetMaxIdleConns(g.Config.DbMaxIdle)
 	sqlDb.SetMaxOpenConns(g.Config.DbMaxOpen)
 	sqlDb.SetConnMaxLifetime(time.Minute * time.Duration(g.Config.DbMaxLifeTime))

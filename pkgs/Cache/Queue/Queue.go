@@ -1,14 +1,14 @@
 package Queue
 
 import (
-	"github.com/aiscrm/redisgo"
-	r "github.com/gomodule/redigo/redis"
-	"github.com/kevinu2/ngo/constant"
+	"github.com/gomodule/redigo/redis"
+	"ngo2/pkgs/Default"
+	"ngo2/pkgs/RedisGo"
 )
 
 type Queue struct {
 	QueueName    string
-	Redis        *redisgo.Cacher
+	Redis        *RedisGo.Cacher
 	RedisTimeout int
 }
 
@@ -26,13 +26,13 @@ func (q Queue) Consume() (string, error) {
 	for {
 		rs, err := q.Redis.BRPop(q.QueueName, q.RedisTimeout)
 		if err != nil {
-			return constant.DefaultEmpty, err
+			return Default.StringEmpty, err
 		} else {
 			if rs == nil {
 				continue
 				//return Default.DEFAULT_EMPTY, enum.ErrorQueueEmpty.GetMsg("q.QueueName")
 			} else {
-				return r.String(rs, err)
+				return redis.String(rs, err)
 			}
 		}
 	}

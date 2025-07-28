@@ -2,7 +2,7 @@ package Utils
 
 import (
 	"fmt"
-	"github.com/kevinu2/ngo2/pkgs/Default"
+	"ngo2/pkgs/Default"
 	"time"
 )
 
@@ -69,12 +69,12 @@ func (timeUtils) UnixPoint(unixTime int64, period int64) int64 {
 	if err != nil {
 		return unixTime
 	}
-	min := int(period / 60)
-	if min == 1 {
+	m := int(period / 60)
+	if m == 1 {
 		sec := inTime.Second() / int(period/15) * int(period/15)
 		t := time.Date(inTime.Year(), inTime.Month(), inTime.Day(), inTime.Hour(), inTime.Minute(), sec, 0, time.UTC)
 		return t.UnixNano() / 1e6
-	} else if min < 60 && 60%min == 0 {
+	} else if m < 60 && 60%m == 0 {
 		sec := inTime.Second() / int(period/15) * int(period/15)
 		t := time.Date(inTime.Year(), inTime.Month(), inTime.Day(), inTime.Hour(), sec/60, sec%60, 0, time.UTC)
 		return t.UnixNano() / 1e6
@@ -88,12 +88,12 @@ func (timeUtils) NextTurn(inTime time.Time, period int64) time.Time {
 	if period%60 != 0 {
 		return time.Time{}
 	}
-	min := int(period / 60)
-	if min == 1 {
+	m := int(period / 60)
+	if m == 1 {
 		date := time.Date(inTime.Year(), inTime.Month(), inTime.Day(), inTime.Hour(), inTime.Minute(), 0, 0, time.UTC)
 		return date.Add(time.Second * time.Duration(period))
-	} else if min < 60 && 60%min == 0 {
-		m := inTime.Minute() / min * min
+	} else if m < 60 && 60%m == 0 {
+		m := inTime.Minute() / m * m
 		date := time.Date(inTime.Year(), inTime.Month(), inTime.Day(), inTime.Hour(), m, 0, 0, time.UTC)
 		return date.Add(time.Second * time.Duration(period))
 	} else {

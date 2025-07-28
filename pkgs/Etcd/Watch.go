@@ -2,11 +2,11 @@ package Etcd
 
 import (
 	"context"
-	"github.com/kevinu2/ngo2/pkgs/Log"
 	"sync"
 
-	"go.etcd.io/etcd/api/mvccpb"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"ngo2/pkgs/Log"
 )
 
 // Watch A watch only tells the latest revision
@@ -19,17 +19,14 @@ type Watch struct {
 	incipientKVs []*mvccpb.KeyValue
 }
 
-// C ...
 func (w *Watch) C() chan *clientv3.Event {
 	return w.eventChan
 }
 
-// IncipientKeyValues incipient key and values
 func (w *Watch) IncipientKeyValues() []*mvccpb.KeyValue {
 	return w.incipientKVs
 }
 
-// NewWatch ...
 func (client *Client) WatchPrefix(ctx context.Context, prefix string) (*Watch, error) {
 	resp, err := client.Get(ctx, prefix, clientv3.WithPrefix())
 	if err != nil {
@@ -79,7 +76,6 @@ func (client *Client) WatchPrefix(ctx context.Context, prefix string) (*Watch, e
 	return w, nil
 }
 
-// Close close watch
 func (w *Watch) Close() error {
 	if w.cancel != nil {
 		w.cancel()

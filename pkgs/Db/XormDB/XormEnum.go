@@ -1,6 +1,6 @@
 package XormDB
 
-import "github.com/kevinu2/ngo2/pkgs/Default"
+import "ngo2/pkgs/Default"
 
 type DbType uint8
 
@@ -16,6 +16,6 @@ func (dt DbType) GetType() string {
 	case DbMySQL:
 		return "mysql"
 	default:
-		return Default.DefaultEmpty
+		return Default.StringEmpty
 	}
 }

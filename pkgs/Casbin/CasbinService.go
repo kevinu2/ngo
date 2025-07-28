@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/casbin/casbin/v2"
 	gormAdapter "github.com/casbin/gorm-adapter/v3"
-	"github.com/kevinu2/ngo2/pkgs/Error"
 	"gorm.io/gorm"
 	"io"
+	"ngo2/pkgs/Error"
 	"os"
 	"strconv"
 	"strings"
@@ -77,15 +77,15 @@ func (c *Casbin) GetCasbin() error {
 	if err != nil {
 		return Error.ErrorNotMatch.GetMsg(err.Error())
 	}
-	c.Enforcer.LoadPolicy()
+	_ = c.Enforcer.LoadPolicy()
 	c.Enforcer.EnableLog(true)
 	return nil
 }
 
-func UpdateCasbinAuths(authInfos []CasbinAuthInfo, roleId int, tx *gorm.DB) error {
+func UpdateCasbinAuths(authInfos []AuthInfo, roleId int, tx *gorm.DB) error {
 	return c.UpdateCasbinAuths(authInfos, roleId, tx)
 }
-func (c *Casbin) UpdateCasbinAuths(authInfos []CasbinAuthInfo, roleId int, tx *gorm.DB) error {
+func (c *Casbin) UpdateCasbinAuths(authInfos []AuthInfo, roleId int, tx *gorm.DB) error {
 	conn := c.GormDB.Table(c.Table)
 	err := c.DeleteCasbinRuleByRoleId(strconv.Itoa(roleId))
 	if err != nil {
@@ -104,21 +104,21 @@ func (c *Casbin) UpdateCasbinAuths(authInfos []CasbinAuthInfo, roleId int, tx *g
 func DeleteCasbinRuleByRoleId(id string) error { return c.DeleteCasbinRuleByRoleId(id) }
 func (c *Casbin) DeleteCasbinRuleByRoleId(id string) error {
 	conn := c.GormDB.Table(c.Table)
-	err := conn.Where("v0 = ?", id).Delete(&CasbinModel{}).Error
+	err := conn.Where("v0 = ?", id).Delete(&Model{}).Error
 	return err
 }
 
 func DeleteCasbinRuleById(id string) error { return c.DeleteCasbinRuleById(id) }
 func (c *Casbin) DeleteCasbinRuleById(id string) error {
 	conn := c.GormDB.Table(c.Table)
-	err := conn.Where("id = ?", id).Delete(&CasbinModel{}).Error
+	err := conn.Where("id = ?", id).Delete(&Model{}).Error
 	return err
 }
 
-func BatchSaveCasbinAuth(conn *gorm.DB, authInfos []CasbinAuthInfo) error {
+func BatchSaveCasbinAuth(conn *gorm.DB, authInfos []AuthInfo) error {
 	return c.BatchSaveCasbinAuth(conn, authInfos)
 }
-func (c *Casbin) BatchSaveCasbinAuth(conn *gorm.DB, authInfos []CasbinAuthInfo) error {
+func (c *Casbin) BatchSaveCasbinAuth(conn *gorm.DB, authInfos []AuthInfo) error {
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("insert into %s(ptype,p_type,v0,v1,v2) values", c.Table)
 	if _, err := buffer.WriteString(sql); err != nil {
@@ -142,10 +142,10 @@ func (c *Casbin) ClearCasbinAuth(v int, p ...string) bool {
 	return rs
 }
 
-func AddCasbinAuth(authInfo CasbinAuthInfo) error { return c.AddCasbinAuth(authInfo) }
-func (c *Casbin) AddCasbinAuth(authInfo CasbinAuthInfo) error {
+func AddCasbinAuth(authInfo AuthInfo) error { return c.AddCasbinAuth(authInfo) }
+func (c *Casbin) AddCasbinAuth(authInfo AuthInfo) error {
 	var (
-		cs CasbinModel
+		cs Model
 		n  int64
 	)
 	err := c.GormDB.Table(c.Table).Where("v0 = ? AND v1 = ? AND v2 = ?", authInfo.AuthorityId, authInfo.Url, authInfo.Method).Find(&cs).Count(&n).Error
@@ -168,20 +168,20 @@ func (c *Casbin) AddCasbinAuth(authInfo CasbinAuthInfo) error {
 	return err
 }
 
-func UpdateUserCasbin(authorityId string, casbinInfos []CasbinInfo) error {
+func UpdateUserCasbin(authorityId string, casbinInfos []Info) error {
 	return c.UpdateUserCasbin(authorityId, casbinInfos)
 }
-func (c *Casbin) UpdateUserCasbin(authorityId string, casbinInfos []CasbinInfo) error {
+func (c *Casbin) UpdateUserCasbin(authorityId string, casbinInfos []Info) error {
 	c.ClearCasbinAuth(0, authorityId)
 	for _, v := range casbinInfos {
-		cm := CasbinModel{
+		cm := Model{
 			Id:          0,
 			PType:       "p",
 			AuthorityId: authorityId,
 			Url:         v.Url,
 			Method:      v.Method,
 		}
-		cms := make([]CasbinModel, 0)
+		cms := make([]Model, 0)
 		cms = append(cms, cm)
 		addFlag := c.AddUserCasbin(cm)
 		if addFlag == false {
@@ -191,17 +191,17 @@ func (c *Casbin) UpdateUserCasbin(authorityId string, casbinInfos []CasbinInfo) 
 	return nil
 }
 
-func AddUserCasbin(cm CasbinModel) bool { return c.AddUserCasbin(cm) }
-func (c *Casbin) AddUserCasbin(cm CasbinModel) bool {
+func AddUserCasbin(cm Model) bool { return c.AddUserCasbin(cm) }
+func (c *Casbin) AddUserCasbin(cm Model) bool {
 	rs, _ := c.Enforcer.AddPolicy(cm.AuthorityId, cm.Url, cm.Method)
 	return rs
 }
 
-func GetAllCasbin(limit, offset int) ([]CasbinModel, error) {
+func GetAllCasbin(limit, offset int) ([]Model, error) {
 	return c.GetAllCasbin(limit, offset)
 }
-func (c *Casbin) GetAllCasbin(limit, offset int) ([]CasbinModel, error) {
-	var cs []CasbinModel
+func (c *Casbin) GetAllCasbin(limit, offset int) ([]Model, error) {
+	var cs []Model
 
 	if err := c.GormDB.Table(c.Table).Limit(limit).Offset(offset).Find(&cs).Error; err != nil {
 		return nil, err
@@ -209,9 +209,9 @@ func (c *Casbin) GetAllCasbin(limit, offset int) ([]CasbinModel, error) {
 	return cs, nil
 }
 
-func UpdateCasbinAuth(param CasbinAuthInfo) error { return c.UpdateCasbinAuth(param) }
-func (c *Casbin) UpdateCasbinAuth(param CasbinAuthInfo) error {
-	var cs CasbinModel
+func UpdateCasbinAuth(param AuthInfo) error { return c.UpdateCasbinAuth(param) }
+func (c *Casbin) UpdateCasbinAuth(param AuthInfo) error {
+	var cs Model
 	rows := c.GormDB.Table(c.Table).Where("v0 = ? AND v1 = ? AND v2 = ?", param.AuthorityId, param.Url, param.Method).Find(&cs).RowsAffected
 	if rows > 0 {
 		return Error.ErrorNotRequired.GetMsg("")
@@ -232,7 +232,7 @@ func (c *Casbin) clearCasbin(v int, p ...string) bool {
 }
 
 func (c *Casbin) DeleteCasbinAuthById(id string) error {
-	var cs CasbinModel
+	var cs Model
 	err := c.GormDB.Table(c.Table).Where("id = ?", id).First(&cs).Error
 	if err != nil {
 		return err
@@ -251,10 +251,13 @@ func (c *Casbin) MatchRoleCasbinRule(param CheckAuthParam) error {
 	return nil
 }
 
-func (c *Casbin) GetPolicyPathByAuthId(authorityId string) (pathMaps []CasbinInfo) {
-	list := c.Enforcer.GetFilteredPolicy(0, authorityId)
+func (c *Casbin) GetPolicyPathByAuthId(authorityId string) (pathMaps []Info) {
+	list, err := c.Enforcer.GetFilteredPolicy(0, authorityId)
+	if err != nil {
+		return nil
+	}
 	for _, v := range list {
-		pathMaps = append(pathMaps, CasbinInfo{
+		pathMaps = append(pathMaps, Info{
 			Url:    v[1],
 			Method: v[2],
 		})

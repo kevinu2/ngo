@@ -2,8 +2,8 @@ package Collection
 
 import (
 	"fmt"
-	"github.com/kevinu2/redisgo"
-	"github.com/kevinu2/ngo2/pkgs/Error"
+	"ngo2/pkgs/Error"
+	"ngo2/pkgs/RedisGo"
 	"time"
 )
 
@@ -15,10 +15,10 @@ type Collection struct {
 	GcMax        int64
 	GcOffsetTime int64
 	GcMaxTime    int64
-	IncrData     CollectionData
-	LastData     CollectionData
-	TailsData    []CollectionData
-	Redis        *redisgo.Cacher
+	IncrData     Data
+	LastData     Data
+	TailsData    []Data
+	Redis        *RedisGo.Cacher
 }
 
 func init() {
@@ -27,13 +27,13 @@ func init() {
 
 func New() *Collection {
 	v := new(Collection)
-	v.GcMax = CollectionGcMax
-	v.GcOffset = CollectionGcOffset
+	v.GcMax = GcMax
+	v.GcOffset = GcOffset
 	return v
 }
 
-func AddRedis(redis *redisgo.Cacher) { c.AddRedis(redis) }
-func (c *Collection) AddRedis(redis *redisgo.Cacher) {
+func AddRedis(redis *RedisGo.Cacher) { c.AddRedis(redis) }
+func (c *Collection) AddRedis(redis *RedisGo.Cacher) {
 	c.Redis = redis
 }
 
@@ -49,7 +49,7 @@ func (c *Collection) AddGc(offset int64) {
 
 func Incr(score int64, member string) { Incr(score, member) }
 func (c *Collection) Incr(score int64, member string) error {
-	c.IncrData = CollectionData{
+	c.IncrData = Data{
 		Score:  score,
 		Member: member,
 	}
@@ -136,9 +136,9 @@ func (c *Collection) Tails(max int64, num int) error {
 		return err
 	}
 	if len(rs) > 0 {
-		var tails []CollectionData
+		var tails []Data
 		for k, v := range rs {
-			tails = append(tails, CollectionData{
+			tails = append(tails, Data{
 				Score:  v,
 				Member: k,
 			})

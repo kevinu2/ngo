@@ -2,11 +2,10 @@ package Etcd
 
 import (
 	"context"
-	"github.com/kevinu2/ngo2/pkgs/Log"
+	"ngo2/pkgs/Log"
 	"time"
 
 	"github.com/pkg/errors"
-	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientV3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -68,7 +67,7 @@ func (s *etcdv3DataSource) handle(resp *clientV3.WatchResponse) {
 	}
 
 	for _, ev := range resp.Events {
-		if ev.Type == mvccpb.PUT || ev.Type == mvccpb.DELETE {
+		if ev.Type == clientV3.EventTypePut || ev.Type == clientV3.EventTypeDelete {
 			select {
 			case s.changed <- struct{}{}:
 			default:

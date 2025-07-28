@@ -2,11 +2,11 @@ package Log
 
 import (
 	"fmt"
-	"github.com/kevinu2/ngo2/pkgs/Default"
 	rotates "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
+	"ngo2/pkgs/Default"
 	"os"
 	"time"
 )
@@ -77,16 +77,16 @@ func (l *Log) initLogger(level zapcore.Level) {
 	})
 
 	switch l.Config.LogOutput {
-	case LogOutputStd.Type():
+	case OutputStd.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
 		)
-	case LogOutputFile.Type():
+	case OutputFile.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.Config.LogPath, l.Config.LogFile))), level),
 		)
 		//logger := zap.NewDevelopment()
-	case LogOutputBoth.Type():
+	case OutputBoth.Type():
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), level),
 			zapcore.NewCore(encoder, zapcore.AddSync(getWriter(fmt.Sprintf("%s/%s", l.Config.LogPath, l.Config.LogFile))), level),
@@ -102,25 +102,25 @@ func (l *Log) initLogger(level zapcore.Level) {
 
 func (l *Log) initLoggerLevel() {
 	switch l.Config.LogLevel {
-	case LogDebug.Level():
+	case Debug.Level():
 		l.initLogger(zapcore.DebugLevel)
 		return
-	case LogInfo.Level():
+	case Info.Level():
 		l.initLogger(zapcore.InfoLevel)
 		return
-	case LogWarn.Level():
+	case Warn.Level():
 		l.initLogger(zapcore.WarnLevel)
 		return
-	case LogError.Level():
+	case Error.Level():
 		l.initLogger(zapcore.ErrorLevel)
 		return
-	case LogDPanic.Level():
+	case DPanic.Level():
 		l.initLogger(zapcore.DPanicLevel)
 		return
-	case LogPanic.Level():
+	case Panic.Level():
 		l.initLogger(zapcore.PanicLevel)
 		return
-	case LogFatal.Level():
+	case Fatal.Level():
 		l.initLogger(zapcore.FatalLevel)
 		return
 	default:

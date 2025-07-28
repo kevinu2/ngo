@@ -3,9 +3,9 @@ package Http
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/kevinu2/ngo2/pkgs/Db/RedisDB"
-	"github.com/kevinu2/ngo2/pkgs/Log"
 	"net/http"
+	"ngo2/pkgs/Db/RedisDB"
+	"ngo2/pkgs/Log"
 )
 
 func LoginFilter() gin.HandlerFunc {

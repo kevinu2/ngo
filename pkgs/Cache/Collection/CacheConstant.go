@@ -1,6 +1,6 @@
 package Collection
 
 const (
-	CollectionGcMax    = int64(100)
-	CollectionGcOffset = int64(50)
+	GcMax    = int64(100)
+	GcOffset = int64(50)
 )

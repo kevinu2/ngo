@@ -190,6 +190,5 @@ func Sqrt(d1Str string) string {
 	d1Float, _ := d1.Float64()
 	d1Sqrt := math.Sqrt(d1Float)
 	d1Result := decimal.NewFromFloat(d1Sqrt)
-	//Log.Logger().Infof("String: %v, Dec: %v, Float: %v, Sqrt: %v, result: %v", d1, d1Float, d1Sqrt, d1Result)
 	return d1Result.String()
 }

@@ -51,7 +51,7 @@ func (stringsUtils) RandCode(width int) string {
 
 	var buffer strings.Builder
 	for i := 0; i < width; i++ {
-		fmt.Fprintf(&buffer, "%d", numeric[rand.Intn(r)])
+		_, _ = fmt.Fprintf(&buffer, "%d", numeric[rand.Intn(r)])
 	}
 	return buffer.String()
 }

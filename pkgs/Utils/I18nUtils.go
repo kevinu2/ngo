@@ -2,7 +2,7 @@ package Utils
 
 import (
 	"encoding/json"
-	"github.com/kevinu2/ngo2/pkgs/BigMath"
+	"ngo2/pkgs/BigMath"
 )
 
 type i18n struct {

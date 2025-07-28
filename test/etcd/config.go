@@ -3,8 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kevinu2/ngo2/pkgs/Etcd"
-	"ngo.new/pkgs/Log"
+	"ngo2/pkgs/Etcd"
 )
 
 func main() {
@@ -14,19 +13,19 @@ func main() {
 	}
 	cli, err := Etcd.NewClient(&config)
 	if err != nil {
-		Log.Logger().Panic(err.Error())
+		panic(err.Error())
 		return
 	}
 
 	_, err = cli.Put(context.Background(), "test", "test123")
 	if err != nil {
-		Log.Logger().Panic(err.Error())
+		panic(err.Error())
 		return
 	}
 
 	get, err := cli.Get(context.Background(), "test")
 	if err != nil {
-		Log.Logger().Panic(err.Error())
+		panic(err.Error())
 		return
 	}
 
