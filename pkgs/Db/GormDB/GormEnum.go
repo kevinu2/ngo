@@ -1,8 +1,8 @@
 package GormDB
 
 import (
+	"github.com/kevinu2/ngo/v2/pkgs/Default"
 	"gorm.io/gorm/logger"
-	"ngo2/pkgs/Default"
 )
 
 type DbType uint8

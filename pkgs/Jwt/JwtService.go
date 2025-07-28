@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
-	"ngo2/pkgs/RedisGo"
+	"github.com/kevinu2/ngo/v2/pkgs/RedisGo"
 	"strconv"
 	"time"
 )

@@ -2,8 +2,8 @@ package Collection
 
 import (
 	"fmt"
-	"ngo2/pkgs/Error"
-	"ngo2/pkgs/RedisGo"
+	"github.com/kevinu2/ngo/v2/pkgs/Error"
+	"github.com/kevinu2/ngo/v2/pkgs/RedisGo"
 	"time"
 )
 

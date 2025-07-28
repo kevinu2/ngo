@@ -3,7 +3,7 @@ package RedisDB
 import (
 	"encoding/json"
 	"fmt"
-	"ngo2/pkgs/RedisGo"
+	"github.com/kevinu2/ngo/v2/pkgs/RedisGo"
 )
 
 var r *DB

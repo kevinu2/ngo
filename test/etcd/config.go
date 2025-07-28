@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"ngo2/pkgs/Etcd"
+	"github.com/kevinu2/ngo/v2/pkgs/Etcd"
 )
 
 func main() {

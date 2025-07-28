@@ -2,7 +2,7 @@ package Jwt
 
 import (
 	"github.com/gin-gonic/gin"
-	"ngo2/pkgs/Http"
+	"github.com/kevinu2/ngo/v2/pkgs/Http"
 )
 
 type ErrorType uint8

@@ -2,8 +2,8 @@ package Queue
 
 import (
 	"github.com/gomodule/redigo/redis"
-	"ngo2/pkgs/Default"
-	"ngo2/pkgs/RedisGo"
+	"github.com/kevinu2/ngo/v2/pkgs/Default"
+	"github.com/kevinu2/ngo/v2/pkgs/RedisGo"
 )
 
 type Queue struct {

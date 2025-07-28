@@ -2,8 +2,8 @@ package Casbin
 
 import (
 	"github.com/gin-gonic/gin"
-	"ngo2/pkgs/Default"
-	"ngo2/pkgs/Jwt"
+	"github.com/kevinu2/ngo/v2/pkgs/Default"
+	"github.com/kevinu2/ngo/v2/pkgs/Jwt"
 	"strings"
 )
 

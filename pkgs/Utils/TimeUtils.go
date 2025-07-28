@@ -2,7 +2,7 @@ package Utils
 
 import (
 	"fmt"
-	"ngo2/pkgs/Default"
+	"github.com/kevinu2/ngo/v2/pkgs/Default"
 	"time"
 )
 

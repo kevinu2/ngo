@@ -11,11 +11,11 @@ import (
 	"time"
 
 	grpcProm "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/kevinu2/ngo/v2/pkgs/Log"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/concurrency"
 	"google.golang.org/grpc"
-	"ngo2/pkgs/Log"
 )
 
 // Client ...

@@ -1,6 +1,6 @@
 package SqlXDB
 
-import "ngo2/pkgs/Default"
+import "github.com/kevinu2/ngo/v2/pkgs/Default"
 
 type DbType uint8
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
+	"github.com/kevinu2/ngo/v2/pkgs/Log"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"ngo2/pkgs/Log"
 )
 
 // Watch A watch only tells the latest revision

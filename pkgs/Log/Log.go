@@ -2,11 +2,11 @@ package Log
 
 import (
 	"fmt"
+	"github.com/kevinu2/ngo/v2/pkgs/Default"
 	rotates "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
-	"ngo2/pkgs/Default"
 	"os"
 	"time"
 )
