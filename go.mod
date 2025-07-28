@@ -1,4 +1,4 @@
-module ngo2
+module github.com/kevinu2/ngo2
 
 go 1.24.5
 
