@@ -5,12 +5,11 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"google.golang.org/grpc/credentials/insecure"
 	"os"
 	"strings"
-	"time"
 
-	grpcProm "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/kevinu2/ngo/v2/pkgs/Log"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -26,25 +25,19 @@ type Client struct {
 
 // NewClient ...
 func NewClient(config *Config) (*Client, error) {
-	conf := clientv3.Config{
-		Endpoints:            config.Endpoints,
-		DialTimeout:          config.ConnectTimeout,
-		DialKeepAliveTime:    10 * time.Second,
-		DialKeepAliveTimeout: 3 * time.Second,
-		DialOptions: []grpc.DialOption{
-			grpc.WithBlock(),
-			grpc.WithUnaryInterceptor(grpcProm.UnaryClientInterceptor),
-			grpc.WithStreamInterceptor(grpcProm.StreamClientInterceptor),
-		},
-		AutoSyncInterval: config.AutoSyncInterval,
-	}
+	conf := clientv3.Config{}
 
 	if config.Endpoints == nil {
 		return nil, errors.New("client etcd endpoints empty, empty endpoints")
 	}
 
+	// build dial options (fix previously ignored insecure option)
+	var dialOpts []grpc.DialOption
 	if !config.Secure {
-		grpc.WithTransportCredentials(insecure.NewCredentials())
+		dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+	if len(dialOpts) > 0 {
+		conf.DialOptions = dialOpts
 	}
 
 	if config.BasicAuth {

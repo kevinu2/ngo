@@ -3,8 +3,9 @@ package KafkaMq
 import (
 	"context"
 	"fmt"
-	"github.com/IBM/sarama"
 	"time"
+
+	"github.com/IBM/sarama"
 )
 
 var m *MsgQueue

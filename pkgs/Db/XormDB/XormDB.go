@@ -3,11 +3,12 @@ package XormDB
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/xormplus/xorm"
 	"github.com/xormplus/xorm/log"
 	"github.com/xormplus/xorm/names"
-	"time"
 )
 
 var x *Xorm

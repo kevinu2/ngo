@@ -2,8 +2,9 @@ package Etcd
 
 import (
 	"context"
-	"github.com/kevinu2/ngo/v2/pkgs/Log"
 	"time"
+
+	"github.com/kevinu2/ngo/v2/pkgs/Log"
 
 	"github.com/pkg/errors"
 	clientV3 "go.etcd.io/etcd/client/v3"

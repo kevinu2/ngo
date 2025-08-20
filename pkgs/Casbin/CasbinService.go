@@ -3,14 +3,15 @@ package Casbin
 import (
 	"bytes"
 	"fmt"
-	"github.com/casbin/casbin/v2"
-	gormAdapter "github.com/casbin/gorm-adapter/v3"
-	"github.com/kevinu2/ngo/v2/pkgs/Error"
-	"gorm.io/gorm"
 	"io"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/casbin/casbin/v2"
+	gormAdapter "github.com/casbin/gorm-adapter/v3"
+	"github.com/kevinu2/ngo/v2/pkgs/Error"
+	"gorm.io/gorm"
 )
 
 var c *Casbin

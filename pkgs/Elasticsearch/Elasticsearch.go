@@ -2,9 +2,10 @@ package Elasticsearch
 
 import (
 	"fmt"
-	"github.com/elastic/go-elasticsearch"
 	"net/http"
 	"time"
+
+	"github.com/elastic/go-elasticsearch"
 )
 
 var e *Elasticsearch

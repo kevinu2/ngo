@@ -2,8 +2,9 @@ package Utils
 
 import (
 	"fmt"
-	"github.com/kevinu2/ngo/v2/pkgs/Default"
 	"time"
+
+	"github.com/kevinu2/ngo/v2/pkgs/Default"
 )
 
 const (

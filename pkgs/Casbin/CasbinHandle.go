@@ -1,10 +1,11 @@
 package Casbin
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/kevinu2/ngo/v2/pkgs/Default"
 	"github.com/kevinu2/ngo/v2/pkgs/Jwt"
-	"strings"
 )
 
 func Handler() gin.HandlerFunc {

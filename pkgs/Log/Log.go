@@ -2,13 +2,14 @@ package Log
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"time"
+
 	"github.com/kevinu2/ngo/v2/pkgs/Default"
 	rotates "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"io"
-	"os"
-	"time"
 )
 
 var l *Log

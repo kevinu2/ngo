@@ -2,9 +2,10 @@ package Collection
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/kevinu2/ngo/v2/pkgs/Error"
 	"github.com/kevinu2/ngo/v2/pkgs/RedisGo"
-	"time"
 )
 
 var c *Collection

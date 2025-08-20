@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/kevinu2/ngo/v2/pkgs/RedisGo"
-	"strconv"
-	"time"
 )
 
 var j *JWT

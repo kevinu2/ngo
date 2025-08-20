@@ -2,9 +2,10 @@ package BigMath
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/kevinu2/ngo/v2/pkgs/Default"
 	"github.com/shopspring/decimal"
-	"strings"
 )
 
 func DecToBin(d1Str string) (decStr string) {

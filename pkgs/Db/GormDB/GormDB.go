@@ -3,14 +3,15 @@ package GormDB
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"gorm.io/driver/clickhouse"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"os"
-	"time"
 )
 
 var g *Gorm

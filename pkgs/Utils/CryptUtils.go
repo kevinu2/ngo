@@ -6,10 +6,11 @@ import (
 	"crypto/sha1"
 	"crypto/sha512"
 	"fmt"
+	"strings"
+
 	uuid "github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/sha3"
-	"strings"
 )
 
 const InvitationKey = "E5aFbCDcGd3HeQAf4Bg1NiOjPhIkJ2lRSnTUmV67MWX89KLYZ"

@@ -2,30 +2,29 @@ package Etcd
 
 import (
 	"flag"
-	"github.com/kevinu2/ngo/v2/pkgs/Log"
 	"time"
+
+	"github.com/kevinu2/ngo/v2/pkgs/Log"
 )
 
 var ConfigPrefix = "etcdv3"
 
 // Config ...
-type (
-	Config struct {
-		Endpoints []string `json:"endpoints"`
-		CertFile  string   `json:"certFile"`
-		KeyFile   string   `json:"keyFile"`
-		CaCert    string   `json:"caCert"`
-		BasicAuth bool     `json:"basicAuth"`
-		UserName  string   `json:"userName"`
-		Password  string   `json:"-"`
-		// 连接超时时间
-		ConnectTimeout time.Duration `json:"connectTimeout"`
-		Secure         bool          `json:"secure"`
-		// 自动同步member list的间隔
-		AutoSyncInterval time.Duration `json:"autoAsyncInterval"`
-		TTL              int           // 单位：s
-	}
-)
+type Config struct {
+	Endpoints []string `json:"endpoints"`
+	CertFile  string   `json:"certFile"`
+	KeyFile   string   `json:"keyFile"`
+	CaCert    string   `json:"caCert"`
+	BasicAuth bool     `json:"basicAuth"`
+	UserName  string   `json:"userName"`
+	Password  string   `json:"-"`
+	// 连接超时时间
+	ConnectTimeout time.Duration `json:"connectTimeout"`
+	Secure         bool          `json:"secure"`
+	// 自动同步member list的间隔
+	AutoSyncInterval time.Duration `json:"autoAsyncInterval"`
+	TTL              int           // 单位：s
+}
 
 func (config *Config) BindFlags(fs *flag.FlagSet) {
 	fs.BoolVar(&config.Secure, "insecure-etcd", true, "--insecure-etcd=true")

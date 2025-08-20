@@ -2,6 +2,7 @@ package Zinc
 
 import (
 	"context"
+
 	client "github.com/zinclabs/sdk-go-zincsearch"
 )
 

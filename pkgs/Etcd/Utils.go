@@ -2,12 +2,13 @@ package Etcd
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"io"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"

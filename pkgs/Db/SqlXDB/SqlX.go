@@ -2,8 +2,9 @@ package SqlXDB
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 var sqlX *DB
