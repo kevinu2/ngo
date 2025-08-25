@@ -25,6 +25,7 @@ var (
 const (
 	CodeSuccess = 0
 	CodeFail    = 1
+	CodeCorrect = 0
 	CodeError   = 1
 )
 
@@ -34,4 +35,7 @@ const (
 
 	True  = 1
 	False = 0
+
+	On  = 1
+	Off = 0
 )
