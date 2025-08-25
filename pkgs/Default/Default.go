@@ -24,6 +24,8 @@ var (
 
 const (
 	CodeSuccess = 0
+	CodeFail    = 1
+	CodeError   = 1
 )
 
 const (
