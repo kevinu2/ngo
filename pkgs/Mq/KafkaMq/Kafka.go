@@ -49,7 +49,7 @@ func (m *MsgQueue) ConsumeLoop() {
 	for {
 		m.Consumer()
 		time.Sleep(3 * time.Second)
-		fmt.Println("reconnect kafka publish...")
+		fmt.Println("reconnect Kafka publish...")
 	}
 }
 
