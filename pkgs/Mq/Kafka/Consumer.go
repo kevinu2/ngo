@@ -9,7 +9,7 @@ import (
 	"time"
 
 	log "github.com/kevinu2/ngo/v2/pkgs/Log"
-	utils "github.com/kevinu2/ngo/v2/pkgs/Utils"
+	"github.com/kevinu2/ngo/v2/pkgs/Utils"
 
 	kafkaGo "github.com/segmentio/kafka-go"
 	"github.com/segmentio/kafka-go/sasl"
@@ -21,7 +21,7 @@ import (
 type Consumer struct {
 	config         map[interface{}]interface{}
 	decorateEvents bool
-	Messages       chan *kafkaGo.Message
+	Messages       chan *Msg
 	reader         *kafkaGo.Reader
 	readerConfig   *kafkaGo.ReaderConfig
 }
@@ -70,7 +70,7 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 	if v, ok := config["GroupID"]; ok {
 		n.GroupID = v.(string)
 	} else {
-		return nil, errors.New("GroupID must be set in Kafka input")
+		return nil, errors.New("GroupID must be set in kafka input")
 	}
 	// check if Brokers are set in config
 	if v, ok := config["Brokers"]; ok {
@@ -79,20 +79,20 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 				if brokerStr, ok := broker.(string); ok {
 					n.Brokers = append(n.Brokers, brokerStr)
 				} else {
-					return nil, errors.New("brokers must be a list of strings in Kafka output")
+					return nil, errors.New("brokers must be a list of strings in kafka output")
 				}
 			}
 		} else if vv, ok := v.([]string); ok {
 			n.Brokers = vv
 		} else {
-			return nil, errors.New("brokers must be a list of strings in Kafka output")
+			return nil, errors.New("brokers must be a list of strings in kafka output")
 		}
 	} else {
-		return nil, errors.New("brokers must be a list of strings in Kafka output")
+		return nil, errors.New("brokers must be a list of strings in kafka output")
 	}
 	// check environment variable for Brokers
 	if v, ok := os.LookupEnv("KAFKA_BROKERS"); ok {
-		if utils.IsValidBrokers(v, ",") {
+		if Utils.IsValidBrokers(v, ",") {
 			n.Brokers = strings.Split(v, ",")
 		} else {
 			log.Logger().Error("KAFKA_BROKERS environment variable is empty or invalid, should be in the format 'ip1:port,ip2:port'")
@@ -104,16 +104,16 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 				if topicStr, ok := topic.(string); ok {
 					n.GroupTopics = append(n.GroupTopics, topicStr)
 				} else {
-					return nil, errors.New("topics must be a list of strings in Kafka output")
+					return nil, errors.New("topics must be a list of strings in kafka output")
 				}
 			}
 		} else if vv, ok := v.([]string); ok {
 			n.GroupTopics = vv
 		} else {
-			return nil, errors.New("topics must be a list of strings in Kafka output")
+			return nil, errors.New("topics must be a list of strings in kafka output")
 		}
 	} else {
-		return nil, errors.New("topics must be a list of strings in Kafka output")
+		return nil, errors.New("topics must be a list of strings in kafka output")
 	}
 	if v, ok := config["MinBytes"]; ok {
 		n.MinBytes = v.(int)
@@ -194,7 +194,7 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 
 func NewConsumer(config map[interface{}]interface{}) (*Consumer, error) {
 	c := &Consumer{
-		Messages:       make(chan *kafkaGo.Message, 1024),
+		Messages:       make(chan *Msg, 1024),
 		decorateEvents: false,
 		reader:         nil,
 	}
@@ -233,7 +233,7 @@ func NewConsumer(config map[interface{}]interface{}) (*Consumer, error) {
 				log.Logger().Errorf("ReadMessage Error: %s", err.Error())
 				break
 			}
-			c.Messages <- &m
+			c.Messages <- (*Msg)(&m)
 		}
 	}()
 	return c, nil
