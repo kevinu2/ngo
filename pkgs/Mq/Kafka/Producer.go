@@ -21,7 +21,6 @@ type Producer struct {
 	encoder      codec.Encoder
 	producer     *kafkaGo.Writer
 	Brokers      []string
-	Topic        string
 	mu           sync.Mutex
 	recovering   int32
 	closed       int32
@@ -32,7 +31,6 @@ type Producer struct {
 func (o *Producer) newProducer() (*kafkaGo.Writer, error) {
 	w := &kafkaGo.Writer{
 		Addr:                   kafkaGo.TCP(o.Brokers...),
-		Topic:                  o.Topic,
 		Balancer:               &kafkaGo.LeastBytes{},
 		MaxAttempts:            1,
 		WriteBackoffMax:        o.retryBackoff,
@@ -76,12 +74,6 @@ func NewProducer(config map[interface{}]interface{}) (*Producer, error) {
 			log.Logger().Error("KAFKA_BROKERS environment variable is empty or invalid, should be in the format 'ip1:port,ip2:port'")
 		}
 	}
-	// Topic
-	if v, ok := config["Topic"].(string); ok {
-		n.Topic = v
-	} else {
-		return nil, errors.New("topic must be set in kafka output")
-	}
 	// retries
 	if v, ok := config["MaxRetries"].(int); ok {
 		n.maxRetries = v
@@ -92,7 +84,7 @@ func NewProducer(config map[interface{}]interface{}) (*Producer, error) {
 	}
 	p, err := n.newProducer()
 	if err != nil {
-		log.Logger().Error("Failed to create kafka producer %s, %s", n.Topic, err.Error())
+		log.Logger().Errorf("Failed to create kafka producer, %s", err.Error())
 		return nil, err
 	}
 	n.producer = p
@@ -127,10 +119,10 @@ func (o *Producer) recreateWriter() {
 	}
 	p, err := o.newProducer()
 	if err != nil {
-		log.Logger().Fatalf("Failed to recreate kafka producer for Topic=%s, %s", o.Topic, err.Error())
+		log.Logger().Fatalf("Failed to recreate kafka producer, %s", err.Error())
 	}
 	o.producer = p
-	log.Logger().Infof("kafka writer recreated for Topic=%s", o.Topic)
+	log.Logger().Infof("kafka writer recreated")
 }
 
 func (o *Producer) Write(topic string, message []byte) error {
