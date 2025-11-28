@@ -1,5 +1,9 @@
 package Http
 
+type LegacyResponse struct {
+	Err    Error       `json:"err"`
+	Result interface{} `json:"result"`
+}
 type ErrorResponse struct {
 	Err    Error       `json:"error"`
 	Result interface{} `json:"result"`
