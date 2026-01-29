@@ -17,7 +17,7 @@ import (
 )
 
 type Producer struct {
-	config       map[interface{}]interface{}
+	config       map[any]any
 	encoder      codec.Encoder
 	producer     *kafkaGo.Writer
 	Brokers      []string
@@ -41,7 +41,7 @@ func (o *Producer) newProducer() (*kafkaGo.Writer, error) {
 	return w, nil
 }
 
-func NewProducer(config map[interface{}]interface{}) (*Producer, error) {
+func NewProducer(config map[any]any) (*Producer, error) {
 	n := &Producer{
 		config:       config,
 		Brokers:      make([]string, 0),
@@ -50,7 +50,7 @@ func NewProducer(config map[interface{}]interface{}) (*Producer, error) {
 	}
 	// Brokers
 	if v, ok := config["Brokers"]; ok {
-		if vv, ok := v.([]interface{}); ok {
+		if vv, ok := v.([]any); ok {
 			for _, broker := range vv {
 				if brokerStr, ok := broker.(string); ok {
 					n.Brokers = append(n.Brokers, brokerStr)
@@ -84,7 +84,7 @@ func NewProducer(config map[interface{}]interface{}) (*Producer, error) {
 	}
 	p, err := n.newProducer()
 	if err != nil {
-		log.Logger().Errorf("Failed to create kafka producer, %s", err.Error())
+		log.Logger().Errorf("Failed to create Kafka producer, %s", err.Error())
 		return nil, err
 	}
 	n.producer = p
@@ -119,10 +119,10 @@ func (o *Producer) recreateWriter() {
 	}
 	p, err := o.newProducer()
 	if err != nil {
-		log.Logger().Fatalf("Failed to recreate kafka producer, %s", err.Error())
+		log.Logger().Fatalf("Failed to recreate Kafka producer, %s", err.Error())
 	}
 	o.producer = p
-	log.Logger().Infof("kafka writer recreated")
+	log.Logger().Infof("Kafka writer recreated")
 }
 
 func (o *Producer) Write(topic string, message []byte) error {
@@ -148,15 +148,15 @@ func (o *Producer) Write(topic string, message []byte) error {
 		}
 
 		if attempt == 0 && o.isNotLeaderErr(err) {
-			log.Logger().Warnf("kafka not-leader error (will retry): %v", err)
+			log.Logger().Warnf("Kafka not-leader error (will retry): %v", err)
 			go o.recreateWriter()
 		} else {
-			log.Logger().Warnf("kafka write attempt %d failed: %v", attempt+1, err)
+			log.Logger().Warnf("Kafka write attempt %d failed: %v", attempt+1, err)
 		}
 
 		attempt++
 		if attempt > o.maxRetries {
-			log.Logger().Errorf("kafka write failed after %d retries: %v", attempt-1, err)
+			log.Logger().Errorf("Kafka write failed after %d retries: %v", attempt-1, err)
 			return err
 		}
 

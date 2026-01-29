@@ -19,14 +19,14 @@ import (
 
 // Consumer 使用的Kafka-go的input插件
 type Consumer struct {
-	config         map[interface{}]interface{}
+	config         map[any]any
 	decorateEvents bool
 	Messages       chan *Msg
 	reader         *kafkaGo.Reader
 	readerConfig   *kafkaGo.ReaderConfig
 }
 
-func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.ReaderConfig, error) {
+func (c *Consumer) ReaderConfig(config map[any]any) (*kafkaGo.ReaderConfig, error) {
 
 	n := &kafkaGo.ReaderConfig{
 		Brokers:        make([]string, 0),
@@ -59,10 +59,10 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 		WatchPartitionChanges: true,
 		ReadLagInterval:       10 * time.Second,
 
-		Logger: kafkaGo.LoggerFunc(func(msg string, args ...interface{}) {
+		Logger: kafkaGo.LoggerFunc(func(msg string, args ...any) {
 			log.Logger().Debugf(msg, args...)
 		}),
-		ErrorLogger: kafkaGo.LoggerFunc(func(msg string, args ...interface{}) {
+		ErrorLogger: kafkaGo.LoggerFunc(func(msg string, args ...any) {
 			log.Logger().Errorf(msg, args...)
 		}),
 	}
@@ -74,7 +74,7 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 	}
 	// check if Brokers are set in config
 	if v, ok := config["Brokers"]; ok {
-		if vv, ok := v.([]interface{}); ok {
+		if vv, ok := v.([]any); ok {
 			for _, broker := range vv {
 				if brokerStr, ok := broker.(string); ok {
 					n.Brokers = append(n.Brokers, brokerStr)
@@ -99,7 +99,7 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 		}
 	}
 	if v, ok := config["Topics"]; ok {
-		if vv, ok := v.([]interface{}); ok {
+		if vv, ok := v.([]any); ok {
 			for _, topic := range vv {
 				if topicStr, ok := topic.(string); ok {
 					n.GroupTopics = append(n.GroupTopics, topicStr)
@@ -144,7 +144,7 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 	}
 
 	if v, ok := config["SASL"]; ok {
-		vh := v.(map[string]interface{})
+		vh := v.(map[string]any)
 		v1, ok1 := vh["Type"]
 		v2, ok2 := vh["Username"]
 		v3, ok3 := vh["Password"]
@@ -178,7 +178,7 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 	}
 	//TODO TLS support
 	if v, ok := config["TLS"]; ok {
-		vh := v.(map[string]interface{})
+		vh := v.(map[string]any)
 		var t *tls.Config
 		if _, ok := vh["PrivateKey"]; ok {
 
@@ -186,13 +186,13 @@ func (c *Consumer) ReaderConfig(config map[interface{}]interface{}) (*kafkaGo.Re
 		n.Dialer.TLS = t
 	}
 	if err := n.Validate(); err != nil {
-		log.Logger().Fatal("ReadConfig Validate error: ", err)
+		log.Logger().Errorf("ReadConfig Validate error: %s - %v", err.Error(), config)
 		return nil, err
 	}
 	return n, nil
 }
 
-func NewConsumer(config map[interface{}]interface{}) (*Consumer, error) {
+func NewConsumer(config map[any]any) (*Consumer, error) {
 	c := &Consumer{
 		Messages:       make(chan *Msg, 1024),
 		decorateEvents: false,
@@ -202,7 +202,7 @@ func NewConsumer(config map[interface{}]interface{}) (*Consumer, error) {
 
 	c.readerConfig, err = c.ReaderConfig(config)
 	if err != nil {
-		log.Logger().Errorf("consumer configuration error: %s", err.Error())
+		log.Logger().Fatalf("consumer configuration error: %s", err.Error())
 		return nil, err
 	}
 
@@ -216,7 +216,7 @@ func NewConsumer(config map[interface{}]interface{}) (*Consumer, error) {
 				if strings.Contains(err.Error(), "Not Coordinator") {
 					failCount++
 					if failCount > 10 {
-						log.Logger().Fatal("Kafka Not Coordinator Error 10 times, Exit")
+						log.Logger().Error("Kafka Not Coordinator Error 10 times, Exit")
 						os.Exit(1)
 					}
 					log.Logger().Warn("Kafka Not Coordinator Error, Reconnect: %s", err.Error())
@@ -225,7 +225,7 @@ func NewConsumer(config map[interface{}]interface{}) (*Consumer, error) {
 					if c.readerConfig, err = c.ReaderConfig(config); err == nil {
 						c.reader = kafkaGo.NewReader(*c.readerConfig)
 					} else {
-						log.Logger().Fatal("consumer_settings wrong")
+						log.Logger().Error("consumer_settings wrong")
 						os.Exit(1)
 					}
 					continue
@@ -249,6 +249,6 @@ func (c *Consumer) ReadOneEvent() []byte {
 
 func (c *Consumer) Shutdown() {
 	if err := c.reader.Close(); err != nil {
-		log.Logger().Fatal("failed to close reader:", err)
+		log.Logger().Errorf("failed to close reader: %s", err.Error())
 	}
 }
