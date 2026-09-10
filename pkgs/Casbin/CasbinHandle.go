@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	Jwt2 "github.com/kevinu2/ngo/v2/Tokens/Jwt"
 	"github.com/kevinu2/ngo/v2/pkgs/Default"
+	"github.com/kevinu2/ngo/v2/pkgs/Tokens/Jwt"
 )
 
 func Handler() gin.HandlerFunc {
@@ -14,7 +14,7 @@ func Handler() gin.HandlerFunc {
 func (c *Casbin) Handler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		claims, _ := context.Get(DefaultClaims)
-		waitUse := claims.(*Jwt2.Claims)
+		waitUse := claims.(*Jwt.Claims)
 		obj := context.Request.URL.RequestURI()
 		objs := strings.Split(obj, ObjOffset)
 		realObj := strings.TrimPrefix(objs[0], DefaultPrefix)
@@ -29,7 +29,7 @@ func (c *Casbin) Handler() gin.HandlerFunc {
 		if enforceRs {
 			context.Next()
 		} else {
-			Jwt2.ErrorNoPrivileges.GetMsg(context, Default.StringEmpty).Abort()
+			Jwt.ErrorNoPrivileges.GetMsg(context, Default.StringEmpty).Abort()
 			return
 		}
 
