@@ -112,6 +112,11 @@ func (c *Cacher) Get(key string) (interface{}, error) {
 	return c.Do("GET", c.getKey(key))
 }
 
+// Keys 返回匹配 pattern 的所有完整键名，例如 Keys(keyPrefix + "*")。
+func (c *Cacher) Keys(pattern string) ([]string, error) {
+	return redis.Strings(c.Do("KEYS", c.getKey(pattern)))
+}
+
 // GetString 获取string类型的键值
 func (c *Cacher) GetString(key string) (string, error) {
 	return String(c.Get(key))

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/kevinu2/ngo/v2/pkgs/RedisGo"
 )
 
@@ -62,7 +62,7 @@ func (j *JWT) Auth() gin.HandlerFunc {
 		}
 		claims, err := j.Parse(token)
 		if err != nil {
-			if err == errors.New(TokenExpired) {
+			if err == errors.New(Expired) {
 				ErrorTokenParse.GetMsg(c, err.Error()).Abort()
 				return
 			}
@@ -123,29 +123,27 @@ func Parse(tokenString string) (*Claims, error) {
 func (j *JWT) Parse(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (i interface{}, e error) {
 		return j.SigningKey, nil
-	})
+	}, jwt.WithIssuedAt())
 	if err != nil {
-		if ve, ok := err.(*jwt.ValidationError); ok {
-			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, errors.New(TokenMalformed)
-			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				// Token is expired
-				return nil, errors.New(TokenExpired)
-			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, errors.New(TokenNotValidYet)
-			} else {
-				return nil, errors.New(TokenInvalid)
-			}
+		switch {
+		case errors.Is(err, jwt.ErrTokenMalformed):
+			return nil, errors.New(Malformed)
+		case errors.Is(err, jwt.ErrTokenExpired):
+			return nil, errors.New(Expired)
+		case errors.Is(err, jwt.ErrTokenNotValidYet):
+			return nil, errors.New(NotValidYet)
+		default:
+			return nil, errors.New(Invalid)
 		}
 	}
 	if token != nil {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 			return claims, nil
 		}
-		return nil, errors.New(TokenInvalid)
+		return nil, errors.New(Invalid)
 
 	} else {
-		return nil, errors.New(TokenInvalid)
+		return nil, errors.New(Invalid)
 	}
 }
 
@@ -154,21 +152,23 @@ func Refresh(tokenString string) (string, error) {
 }
 
 func (j *JWT) Refresh(tokenString string) (string, error) {
-	jwt.TimeFunc = func() time.Time {
-		return time.Unix(0, 0)
-	}
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return j.SigningKey, nil
-	})
+	}, jwt.WithoutClaimsValidation())
 	if err != nil {
 		return "", err
 	}
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		jwt.TimeFunc = time.Now
+		// 刷新允许已过期的 token，但仍校验签名、签发时间和生效时间。
+		validationClaims := *claims
+		validationClaims.ExpiresAt = nil
+		if err := jwt.NewValidator(jwt.WithIssuedAt()).Validate(&validationClaims); err != nil {
+			return "", err
+		}
 		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(1 * time.Hour))
 		return j.Create(*claims)
 	}
-	return "", errors.New(TokenInvalid)
+	return "", errors.New(Invalid)
 }
 func Get(sessionId string) (string, error) {
 	return j.Get(sessionId)
