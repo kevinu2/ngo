@@ -72,7 +72,7 @@ func (x *Xorm) initDB() {
 	db.SetTZDatabase(loc)
 	db.SetMaxIdleConns(x.Config.MaxIdle)
 	db.SetMaxOpenConns(x.Config.MaxOpen)
-	db.SetConnMaxLifetime(time.Duration(x.Config.MaxLifeTime))
+	db.SetConnMaxLifetime(time.Duration(x.Config.MaxLifeTime) * time.Minute)
 	db.ShowSQL(x.Config.ShowSQL)
 	db.Logger().SetLevel(log.LOG_DEBUG)
 	db.SetMapper(names.GonicMapper{})
