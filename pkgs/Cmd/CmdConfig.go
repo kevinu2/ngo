@@ -11,6 +11,7 @@ import (
 func DefaultConfig() *Config {
 	return &Config{
 		Service:          0,
+		Role:             RoleExec,
 		InstanceID:       uuid.NewV4().String(),
 		ListenAddress:    "0.0.0.0:9102",
 		AdvertiseAddress: "",

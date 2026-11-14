@@ -18,6 +18,8 @@ import (
 
 // Event describes transport activity, independently of any business operation.
 type Event struct {
+	SourceRole     RoleType        `json:"source_role"`
+	TargetRole     RoleType        `json:"target_role"`
 	EventID        string          `json:"event_id"`
 	TaskID         string          `json:"task_id"`
 	Source         CmdType         `json:"source"`
@@ -64,7 +66,7 @@ func (s *Service) emit(event string, cmd Message, peer string, data json.RawMess
 	if s.events == nil {
 		return
 	}
-	e := Event{EventID: uuid.NewV4().String(), TaskID: cmd.TaskID, Source: cmd.Source, Target: cmd.Target, Action: cmd.Action, InstanceID: s.instance.ID, PeerInstanceID: peer, Event: event, RequestData: SafeData(cmd.Data), ResponseData: SafeData(data), EventTime: time.Now().UTC()}
+	e := Event{SourceRole: cmd.SourceRole, TargetRole: cmd.TargetRole, EventID: uuid.NewV4().String(), TaskID: cmd.TaskID, Source: cmd.Source, Target: cmd.Target, Action: cmd.Action, InstanceID: s.instance.ID, PeerInstanceID: peer, Event: event, RequestData: SafeData(cmd.Data), ResponseData: SafeData(data), EventTime: time.Now().UTC()}
 	if !start.IsZero() {
 		e.DurationMS = time.Since(start).Milliseconds()
 	}

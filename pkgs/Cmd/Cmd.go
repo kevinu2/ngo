@@ -82,14 +82,17 @@ func New(config *Config) (*Service, error) {
 	cfg.Routes = make(map[CmdType]OnMessage, len(config.Routes)+1)
 	cfg.Routes[cfg.Service] = cfg.OnMessage
 	for target, onMessage := range config.Routes {
-		if target <= 0 {
+		if target.Get().Name() == "" {
 			return nil, errors.New("invalid CMD route")
 		}
 		cfg.Routes[target] = onMessage
 	}
 
-	if cfg.Service <= 0 {
+	if cfg.Service.Get().Name() == "" {
 		return nil, errors.New("CMD service engine is required")
+	}
+	if cfg.Role != RoleCtl && cfg.Role != RoleExec {
+		return nil, errors.New("CMD role must be Ctl or Exec")
 	}
 	if cfg.InstanceID == "" || cfg.InstanceID == "." || cfg.InstanceID == ".." || strings.ContainsAny(cfg.InstanceID, "/\\\x00") {
 		return nil, errors.New("invalid CMD instance ID")
@@ -103,7 +106,7 @@ func New(config *Config) (*Service, error) {
 	}
 	timeouts := make(map[CmdType]time.Duration, len(cfg.RouteTimeouts))
 	for route, timeout := range cfg.RouteTimeouts {
-		if route <= 0 || timeout <= 0 {
+		if route.Get().Name() == "" || timeout <= 0 {
 			return nil, errors.New("invalid CMD route timeout")
 		}
 		timeouts[route] = timeout
@@ -132,7 +135,7 @@ func New(config *Config) (*Service, error) {
 
 	s := &Service{
 		cfg:           cfg,
-		instance:      Instance{Service: cfg.Service, ID: cfg.InstanceID, Address: address},
+		instance:      Instance{Role: cfg.Role, Service: cfg.Service, ID: cfg.InstanceID, Address: address},
 		errors:        make(chan error, 8),
 		registrations: make(chan Instance, 1),
 	}
@@ -218,7 +221,7 @@ func (s *Service) register(ctx context.Context) (clientv3.LeaseID, <-chan *clien
 		instance := s.instance
 		instance.Service = service
 		value, _ := json.Marshal(instance)
-		key := s.cfg.Prefix + "/" + strconv.Itoa(int(service)) + "/" + s.cfg.InstanceID
+		key := s.cfg.Prefix + "/" + service.Get().Role().name(s.cfg.Role) + "/" + s.cfg.InstanceID
 		checks = append(checks, clientv3.Compare(clientv3.Version(key), "=", 0))
 		writes = append(writes, clientv3.OpPut(key, string(value), clientv3.WithLease(lease.ID)))
 	}
@@ -345,6 +348,9 @@ func (s *Service) Receive(_ context.Context, cmd *Message, reply *Reply) (receiv
 	}()
 	reply.TaskID = cmd.TaskID
 	reply.InstanceID = s.instance.ID
+	if cmd.TargetRole != s.cfg.Role || (cmd.SourceRole != RoleCtl && cmd.SourceRole != RoleExec) {
+		return errors.New("CMD role mismatch")
+	}
 	if cmd.TaskID == "" || cmd.Action == 0 {
 		return errors.New("CMD task ID and action are required")
 	}
@@ -364,19 +370,19 @@ func (s *Service) Receive(_ context.Context, cmd *Message, reply *Reply) (receiv
 }
 
 // Discover returns every live registration of the exact service name.
-func (s *Service) Discover(ctx context.Context, service CmdType) ([]Instance, error) {
+func (s *Service) Discover(ctx context.Context, service string) ([]Instance, error) {
 	s.lifecycle.Lock()
 	ready := s.state == stateStarted
 	s.lifecycle.Unlock()
 	if !ready {
 		return nil, errors.New("CMD service is not started")
 	}
-	if service <= 0 {
+	if service == "" || strings.ContainsAny(service, "/\\\x00") {
 		return nil, errors.New("invalid CMD service engine")
 	}
 	ctx, cancel := context.WithTimeout(ctx, s.cfg.Timeout)
 	defer cancel()
-	prefix := s.cfg.Prefix + "/" + strconv.Itoa(int(service)) + "/"
+	prefix := s.cfg.Prefix + "/" + service + "/"
 	resp, err := s.etcd.Get(ctx, prefix, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
@@ -387,7 +393,7 @@ func (s *Service) Discover(ctx context.Context, service CmdType) ([]Instance, er
 		if err = json.Unmarshal(kv.Value, &i); err != nil {
 			return nil, fmt.Errorf("invalid CMD registration %s: %w", kv.Key, err)
 		}
-		if i.Service != service || i.Service <= 0 || i.ID == "" || i.ID == "." || i.ID == ".." || strings.ContainsAny(i.ID, "/\\\x00") || string(kv.Key) != s.cfg.Prefix+"/"+strconv.Itoa(int(i.Service))+"/"+i.ID || i.Address == "" {
+		if i.Service.Get().Role().name(i.Role) != service || i.Service.Get().Name() == "" || i.ID == "" || i.ID == "." || i.ID == ".." || strings.ContainsAny(i.ID, "/\\\x00") || string(kv.Key) != prefix+i.ID || i.Address == "" {
 			return nil, fmt.Errorf("invalid CMD registration %s", kv.Key)
 		}
 		instances = append(instances, i)
@@ -399,6 +405,7 @@ func (s *Service) Discover(ctx context.Context, service CmdType) ([]Instance, er
 func (s *Service) call(ctx context.Context, target Instance, cmd Message) (result Result) {
 	result = Result{Instance: target}
 	cmd.Target = target.Service
+	cmd.TargetRole = target.Role
 	started := time.Now()
 	s.emit("send", cmd, target.ID, nil, nil, time.Time{})
 	defer func() {
@@ -433,6 +440,7 @@ func (s *Service) call(ctx context.Context, target Instance, cmd Message) (resul
 	}
 	defer rpc.Close()
 	cmd.Target = target.Service
+	cmd.TargetRole = target.Role
 	metadata := make(map[string]string)
 	if deadline, ok := ctx.Deadline(); ok {
 		metadata[share.ServerTimeout] = strconv.FormatInt(max(1, time.Until(deadline).Milliseconds()), 10)
@@ -458,6 +466,7 @@ func (s *Service) prepare(cmd Message) (Message, error) {
 	if cmd.TaskID == "" {
 		cmd.TaskID = uuid.NewV4().String()
 	}
+	cmd.SourceRole = s.cfg.Role
 	if cmd.Source == 0 {
 		cmd.Source = s.instance.Service
 	}
@@ -468,19 +477,18 @@ func (s *Service) prepare(cmd Message) (Message, error) {
 }
 
 // Send notifies every instance registered under the service name.
-func (s *Service) Send(ctx context.Context, service CmdType, cmd Message) ([]Result, error) {
+func (s *Service) Send(ctx context.Context, service string, cmd Message) ([]Result, error) {
 	cmd, err := s.prepare(cmd)
 	if err != nil {
 		return nil, err
 	}
-	cmd.Target = service
 	instances, err := s.Discover(ctx, service)
 	if err != nil {
 		s.emit("error", cmd, "", nil, err, time.Time{})
 		return nil, err
 	}
 	if len(instances) == 0 {
-		err = fmt.Errorf("no CMD instances for %d", service)
+		err = fmt.Errorf("no CMD instances for %s", service)
 		s.emit("error", cmd, "", nil, err, time.Time{})
 		return nil, err
 	}
@@ -506,7 +514,7 @@ func (s *Service) Send(ctx context.Context, service CmdType, cmd Message) ([]Res
 	var failures []error
 	for _, r := range results {
 		if r.Err != nil {
-			failures = append(failures, fmt.Errorf("%d/%s: %w", service, r.Instance.ID, r.Err))
+			failures = append(failures, fmt.Errorf("%s/%s: %w", service, r.Instance.ID, r.Err))
 		}
 	}
 	return results, errors.Join(failures...)
@@ -525,6 +533,10 @@ func SendCommand(ctx context.Context, source, target CmdType, action ActionType,
 	if err != nil {
 		return err
 	}
-	_, err = s.Send(ctx, target, Message{Source: source, Action: action, TaskID: taskID, Data: payload})
+	role := RoleExec
+	if s.cfg.Role == RoleExec {
+		role = RoleCtl
+	}
+	_, err = s.Send(ctx, target.Get().Role().name(role), Message{Source: source, Action: action, TaskID: taskID, Data: payload})
 	return err
 }

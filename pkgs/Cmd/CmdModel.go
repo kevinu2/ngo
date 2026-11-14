@@ -14,6 +14,7 @@ type OnMessage func(Message) (json.RawMessage, error)
 // Config is initialized by the caller using struct fields or DefaultConfig.
 type Config struct {
 	OnEvent          func(context.Context, Event) error
+	Role             RoleType
 	Service          CmdType
 	InstanceID       string
 	ListenAddress    string
@@ -31,11 +32,13 @@ type Config struct {
 }
 
 type Message struct {
-	TaskID string          `json:"task_id"`
-	Action ActionType      `json:"action"`
-	Source CmdType         `json:"source"`
-	Target CmdType         `json:"target"`
-	Data   json.RawMessage `json:"data,omitempty"`
+	SourceRole RoleType        `json:"source_role"`
+	TargetRole RoleType        `json:"target_role"`
+	TaskID     string          `json:"task_id"`
+	Action     ActionType      `json:"action"`
+	Source     CmdType         `json:"source"`
+	Target     CmdType         `json:"target"`
+	Data       json.RawMessage `json:"data,omitempty"`
 }
 
 type Reply struct {
@@ -46,9 +49,10 @@ type Reply struct {
 }
 
 type Instance struct {
-	Service CmdType `json:"service"`
-	ID      string  `json:"id"`
-	Address string  `json:"address"`
+	Role    RoleType `json:"role"`
+	Service CmdType  `json:"service"`
+	ID      string   `json:"id"`
+	Address string   `json:"address"`
 }
 
 type Result struct {
